@@ -1,115 +1,13 @@
 <template>
-  <div class="dashboard">
-    <!-- Barra lateral -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h2>LASIN 2.0</h2>
-      </div>
-      <nav class="sidebar-nav">
-        <a
-          v-for="item in menuItems"
-          :key="item.label"
-          href="#"
-          class="nav-item"
-          :class="{ active: isActive(item.route) }"
-          @click.prevent="navigate(item.route)"
->
 
-          <span class="nav-icon" v-html="item.icon"></span>
-          <span>{{ item.label }}</span>
-          
-        </a>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="footer-user-info">
-          <div class="user-avatar">SA</div>
-          <div class="footer-user-text">
-            <strong>Super Admin</strong>
-            <span>Control total</span>
-          </div>
-        </div>
-        <button class="btn-logout" @click="$router.push('/login')">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Salir
-        </button>
-      </div>
-    </aside>
-
-    <!-- Contenido principal -->
-    <div class="main">
-      <header class="topbar">
-        <h1>{{ pageTitle }}</h1>
-        <div class="user-info">
-          <span>Super Admin</span>
-        </div>
-      </header>
-      <section class="content">
-        <!-- Aquí puedes colocar gráficos, tablas, etc. -->
-        <p>Bienvenido Super Admin</p>
-        
-      </section>
-    </div>
-  </div>
+  <SuperadminLayout>
+    <p>Bienvenido Super Admin</p>
+  </SuperadminLayout>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import SuperadminLayout from '../../components/SuperadminLayout.vue'
 
-const router = useRouter()
-const route = useRoute()
-
-const menuItems = [
-  {
-    label: 'Dasboard',
-    route: '/superadmin/dashboard',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'
-  },
-  {
-    label: 'Perfil',
-    route: '/superadmin/Perfil',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'
-  },
-  
-  {
-    label: 'Gestion de Cursos',
-    route: '/superadmin/cursos',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>'
-  },
-  {
-    label: 'Gestion de Docentes',
-    route: '/superadmin/Docentes',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
-  },
-  {
-    label: 'Gestion de Estudiantes',
-    route: '/superadmin/estudiantes',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
-  },
-  {
-    label: 'Reportes',
-    route: '/superadmin/reportes',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>'
-  }
-]
-
-// Determina si el ítem está activo según la ruta actual
-function isActive(itemRoute) {
-  return route.path === itemRoute
-}
-
-// Navega programáticamente
-function navigate(path) {
-  if (route.path !== path) {
-    router.push(path)
-  }
-}
-
-// Título dinámico basado en el label del ítem activo
-const pageTitle = computed(() => {
-  const currentItem = menuItems.find(item => item.route === route.path)
-  return currentItem ? `Panel — ${currentItem.label}` : 'Panel'
-})
 </script>
 
 <style>

@@ -13,7 +13,7 @@
             </svg>
           </div>
           <div>
-            <strong class="hero-logo__title">LASIN 2.0</strong>
+            <strong class="hero-logo__title">LASIN 2.01</strong>
             <span class="hero-logo__sub">Laboratorio Superior de Informática</span>
           </div>
         </div>

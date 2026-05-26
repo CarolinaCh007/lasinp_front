@@ -1,115 +1,86 @@
 <template>
-  <div class="dashboard">
-    <!-- Barra lateral -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h2>LASIN 2.0</h2>
-      </div>
-      <nav class="sidebar-nav">
-        <a
-          v-for="item in menuItems"
-          :key="item.label"
-          href="#"
-          class="nav-item"
-          :class="{ active: isActive(item.route) }"
-          @click.prevent="navigate(item.route)"
->
 
-          <span class="nav-icon" v-html="item.icon"></span>
-          <span>{{ item.label }}</span>
-          
-        </a>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="footer-user-info">
-          <div class="user-avatar">SA</div>
-          <div class="footer-user-text">
-            <strong>Super Admin</strong>
-            <span>Control total</span>
-          </div>
-        </div>
-        <button class="btn-logout" @click="$router.push('/login')">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Salir
-        </button>
-      </div>
-    </aside>
+  <SuperadminLayout>
+    <template #header-actions>
+      <button class="btn-refresh" @click="cargarLogs" :disabled="cargando">
+        {{ cargando ? 'Actualizando...' : 'Actualizar' }}
+      </button>
+    </template>
 
-    <!-- Contenido principal -->
-    <div class="main">
-      <header class="topbar">
-        <h1>{{ pageTitle }}</h1>
-        <div class="user-info">
-          <span>Super Admin</span>
-        </div>
-      </header>
-      <section class="content">
-        <!-- Aquí puedes colocar gráficos, tablas, etc. -->
-        <p>Bienvenido Super Admin</p>
-        
-      </section>
+    <div class="audit-header">
+      <h2>Auditoría</h2>
+      <p class="subtitle">Historial de acciones del sistema registradas en el log de auditoría.</p>
     </div>
-  </div>
+
+    <div v-if="error" class="alert-error">{{ error }}</div>
+    <div v-if="cargando" class="loader">Cargando registros...</div>
+
+    <div v-else>
+      <table class="audit-table" v-if="logs.length">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Acción</th>
+            <th>Tabla afectada</th>
+            <th>Usuario</th>
+            <th>IP</th>
+            <th>Fecha / Hora</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="log in logs" :key="log.id_log">
+            <td>{{ log.id_log }}</td>
+            <td>{{ log.accion }}</td>
+            <td>{{ log.tabla_afectada || 'N/A' }}</td>
+            <td>
+              <span v-if="log.nombre_usuario">{{ log.nombre_usuario }}</span>
+              <span v-else class="text-muted">ID {{ log.id_usuario || 'N/A' }}</span>
+            </td>
+            <td>{{ log.direccion_ip || 'N/A' }}</td>
+            <td>{{ formatDate(log.fecha) }} {{ formatTime(log.hora) }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div v-else class="empty-state">
+        No hay registros de auditoría disponibles.
+      </div>
+    </div>
+  </SuperadminLayout>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import SuperadminLayout from '../../components/SuperadminLayout.vue'
+import { logsService } from '../../services/Logs.js'
 
-const router = useRouter()
-const route = useRoute()
+const logs = ref([])
+const cargando = ref(false)
+const error = ref('')
 
-const menuItems = [
-  {
-    label: 'Dasboard',
-    route: '/superadmin/dashboard',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'
-  },
-  {
-    label: 'Perfil',
-    route: '/superadmin/Perfil',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'
-  },
-  
-  {
-    label: 'Gestion de Cursos',
-    route: '/superadmin/cursos',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>'
-  },
-  {
-    label: 'Gestion de Docentes',
-    route: '/superadmin/Docentes',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
-  },
-  {
-    label: 'Gestion de Estudiantes',
-    route: '/superadmin/estudiantes',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
-  },
-  {
-    label: 'Reportes',
-    route: '/superadmin/reportes',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>'
-  }
-]
-
-// Determina si el ítem está activo según la ruta actual
-function isActive(itemRoute) {
-  return route.path === itemRoute
+function formatDate(value) {
+  return value ? new Date(value).toLocaleDateString('es-ES') : ''
 }
 
-// Navega programáticamente
-function navigate(path) {
-  if (route.path !== path) {
-    router.push(path)
+function formatTime(value) {
+  return value ? new Date(value).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : ''
+}
+
+async function cargarLogs() {
+  error.value = ''
+  cargando.value = true
+  try {
+    const response = await logsService.getAll({ limit: 100 })
+    logs.value = response.data
+  } catch (err) {
+    console.error('Error cargando logs:', err)
+    error.value = 'No se pudo cargar el historial de auditoría. Intenta de nuevo.'
+  } finally {
+    cargando.value = false
   }
 }
 
-// Título dinámico basado en el label del ítem activo
-const pageTitle = computed(() => {
-  const currentItem = menuItems.find(item => item.route === route.path)
-  return currentItem ? `Panel — ${currentItem.label}` : 'Panel'
-})
+onMounted(() => cargarLogs())
 </script>
 
 <style>
@@ -133,6 +104,104 @@ const pageTitle = computed(() => {
 </style>
 
 <style scoped>
+
+.audit-header {
+  margin-bottom: 20px;
+}
+
+.audit-header h2 {
+  margin: 0 0 6px;
+  font-size: 24px;
+}
+
+.audit-header .subtitle {
+  margin: 0;
+  color: var(--text-muted, #64748b);
+}
+
+.btn-refresh {
+  border: none;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+
+.audit-table th,
+.audit-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  font-size: 14px;
+}
+
+.audit-table th {
+  background: #f8fafc;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.audit-table tbody tr:hover {
+  background: #f1f5f9;
+}
+
+.text-muted {
+  color: #6b7280;
+}
+
+.alert-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 14px 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.loader,
+.empty-state {
+  padding: 18px 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  color: #475569;
+}
+</style>
+
+<style>
+/* =============================================
+   VARIABLES DE COLOR (Sistema Darwin)
+   Modifícalas aquí para cambiar todo el tema.
+   ============================================= */
+:root {
+  --color-bg: #ffffff;
+  --color-surface: #f8f9fa;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-sidebar-bg: #f1f5f9;
+  --color-sidebar-hover: #e2e8f0;
+  --color-active-bg: rgba(37, 99, 235, 0.1);
+  --radius-md: 8px;
+}
+</style>
+
+<style scoped>
+
 /* =============================================
    LAYOUT PRINCIPAL
    ============================================= */

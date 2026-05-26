@@ -1,13 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { authService } from '../services/auth.js'
 import LoginView from '../views/LoginView.vue'
-
+import PrincipalView from '../views/PrincipalView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      redirect: '/login'
+      redirect: '/Principal'
+    },
+    {
+      path: '/Principal',
+      name: 'principal',
+      component: PrincipalView
     },
     {
       path: '/login',
@@ -43,11 +48,7 @@ const router = createRouter({
       component: () => import('../views/docente/DashboardView.vue'),
       meta: { requiresAuth: true, rol: 'docente' }
     },
-    {
-      path: '/docente/estudiantes',
-      component: () => import('../views/docente/EstudiantesView.vue'),
-      meta: { requiresAuth: true, rol: 'docente' }
-    },
+    
     {
       path: '/docente/calificaciones',
       component: () => import('../views/docente/CalificacionesView.vue'),
@@ -107,21 +108,18 @@ const router = createRouter({
       component: () => import('../views/superadmin/PerfilView.vue'),
       meta: { requiresAuth: true, rol: 'superadmin' }
     },
-    {
-      path: '/superadmin/estudiantes',
-      component: () => import('../views/superadmin/EstudiantesView.vue'),
-      meta: { requiresAuth: true, rol: 'superadmin' }
-    },
+
+    
+   
+
     {
       path: '/superadmin/Auditoria',
       component: () => import('../views/superadmin/AuditoriaView.vue'),
       meta: { requiresAuth: true, rol: 'superadmin' }
     },
-    {
-      path: '/superadmin/Docentes',
-      component: () => import('../views/superadmin/Docentes.View.vue'),
-      meta: { requiresAuth: true, rol: 'superadmin' }
-    }
+
+   
+
   ]
 })
 

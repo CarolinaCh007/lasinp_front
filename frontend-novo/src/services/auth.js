@@ -1,22 +1,8 @@
 
 import axios from 'axios'
+import api from './api'
 
-const API_URL = 'http://127.0.0.1:8000'
 
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
 
 api.interceptors.response.use(
   response => response,
@@ -56,12 +42,24 @@ export const authService = {
    * @returns {Promise<Object>} { access_token, token_type, usuario, rol }
    */
   async login(email, password, rolFrontend = 'estudiante') {
-    const response = await api.post('/auth/login', {
-      correo_electronico: email,
-      password: password
+
+    // FastAPI espera OAuth2 form-urlencoded (username & password)
+    const params = new URLSearchParams()
+    params.append('grant_type', 'password')
+    params.append('username', email)
+    params.append('password', password)
+
+    const response = await api.post('/auth/login', params.toString(), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     })
 
-    const { access_token, token_type, usuario, rol } = response.data
+    const { access_token, token_type, usuario, rol_principal, mensaje } = response.data
+
+    // Mapear rol del backend (p. ej. 'ESTUDIANTE') al rol del frontend ('estudiante')
+    const rol = (this && this.toFrontendRole)
+      ? this.toFrontendRole(rol_principal)
+      : (ROLE_MAP[rol_principal] || (rol_principal || '').toLowerCase())
+
 
     localStorage.setItem('token', access_token)
     localStorage.setItem('usuario', JSON.stringify(usuario))
@@ -71,7 +69,9 @@ export const authService = {
       access_token,
       token_type,
       usuario,
-      rol
+      rol,
+      mensaje
+
     }
   },
 

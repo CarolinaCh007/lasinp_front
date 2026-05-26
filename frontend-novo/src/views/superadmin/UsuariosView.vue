@@ -1,406 +1,1077 @@
 <template>
-  <div class="dashboard">
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-logo">
-        <div class="logo-box">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+  <SuperadminLayout>
+    <div class="toolbar">
+      <div class="filters-group">
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            v-model="searchQuery"
+            type="text"
+            class="input-base"
+            placeholder="Buscar por nombre, CI o correo..."
+          />
+           
         </div>
-        <div><strong>LASIN</strong><span>Super Admin</span></div>
-      </div>
-      <nav class="sidebar-nav">
-        <router-link to="/superadmin/dashboard" class="nav-item">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-          Dashboard
-        </router-link>
-        <router-link to="/superadmin/usuarios" class="nav-item">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          Usuarios
-        </router-link>
-        <router-link to="/superadmin/cursos" class="nav-item">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          Cursos
-        </router-link>
-        <router-link to="/superadmin/reportes" class="nav-item">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Reportes
-        </router-link>
-        <router-link to="/superadmin/auditoria" class="nav-item">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          Log de Auditoría
-        </router-link>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="user-info">
-          <div class="user-avatar">SA</div>
-          <div><strong>Super Admin</strong><span>Control total</span></div>
+        <div class="search-box">  
+        <select v-model="filterEstado" class="select-base">
+          <option value="">Todos los estados</option>
+          <option value="activo">Solo Activos</option>
+          <option value="pendiente">Solo Pendientes</option>
+          <option value="bloqueado">Solo Bloqueados</option>
+          
+        </select>
         </div>
-        <button class="btn-logout" @click="$router.push('/login')">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Salir
-        </button>
-      </div>
-    </aside>
 
-
-
-
-    <!-- Main -->
-    <main class="main">
-
-      <div class="top-bar">
-        <div>
-          <h1>Gestión de Usuarios</h1>
-          <p>Crea, edita y administra todos los usuarios del sistema</p>
-        </div>
-        <button class="btn-nuevo" @click="abrirModalNuevo">
-          + Nuevo usuario
-        </button>
-      </div>
-
-      <!-- Filtros -->
-      <div class="filtros">
-        <div class="search-wrap">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input v-model="busqueda" type="text" placeholder="Buscar usuario..."/>
-        </div>
-        <div class="filtro-tabs">
-          <button
-            v-for="f in filtros" :key="f.value"
-            class="filtro-tab"
-            :class="{ active: filtroRol === f.value }"
-            @click="filtroRol = f.value"
-          >
-            {{ f.label }}
-            <span class="filtro-count">{{ contarPorRol(f.value) }}</span>
-          </button>
+        <div class="search-box">  
+        <select v-model="filterRol" class="select-base">
+          <option value="">Todos los roles</option>
+          <option value="estudiante">Solo Estudiantes</option>
+          <option value="docente">Solo Docentes</option>
+          <option value="admin">Solo Administradores</option>
+          
+        </select>
+>>>>>>> 3b05fd2 (gestion de usuarios terminada)
         </div>
       </div>
 
-      <!-- Tabla -->
-      <div class="panel">
-        <table class="tabla">
-          <thead>
-            <tr>
-              <th>Usuario</th>
-              <th>Correo</th>
-              <th>Rol</th>
-              <th>Estado</th>
-              <th>Fecha registro</th>
-              <th class="th-center">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="u in usuariosFiltrados" :key="u.id">
-              <td>
-                <div class="user-cell">
-                  <div class="user-avatar-sm" :style="{ background: colorRol(u.rol) }">
-                    {{ iniciales(u.nombre) }}
-                  </div>
-                  <div>
-                    <strong>{{ u.nombre }}</strong>
-                    <span>{{ u.carrera }}</span>
-                  </div>
-                </div>
-              </td>
-              <td class="text-gris">{{ u.email }}</td>
-              <td>
-                <span class="badge-rol" :class="u.rol">{{ labelRol(u.rol) }}</span>
-              </td>
-              <td>
-                <span class="badge-estado" :class="u.activo ? 'activo' : 'inactivo'">
-                  {{ u.activo ? '● Activo' : '○ Inactivo' }}
+      <button class="btn-primary" @click="openCreateModal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Nuevo usuario
+      </button>
+    </div>
+
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Nombre completo</th>
+            <th>C.I.</th>
+            <th>Correo electrónico</th>
+            <th>Rol(es)</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="loading">
+            <td colspan="6" class="empty-message">Cargando usuarios del sistema...</td>
+          </tr>
+          <tr v-if="!loading && errorMessage">
+            <td colspan="6" class="empty-message text-danger">⚠️ {{ errorMessage }}</td>
+          </tr>
+          <tr v-for="usuario in filteredUsuarios" :key="usuario.id_usuario">
+            <td>
+              <strong>{{ `${usuario.nombre || ''} ${usuario.ape_paterno || ''} ${usuario.ape_materno || ''}`.trim() }}</strong>
+            </td>
+            <td>{{ usuario.ci || '-' }}</td>
+            <td>{{ usuario.correo_electronico || '-' }}</td>
+            <td>
+              <span v-if="usuario.instancias && usuario.instancias.length" class="roles-cell">
+                <span v-for="inst in usuario.instancias" :key="inst.id_rol" class="badge-role">
+                  {{ inst.rol?.nombre || 'Sin rol' }}
                 </span>
-              </td>
-              <td class="text-gris">{{ u.fechaRegistro }}</td>
-              <td class="th-center">
-                <div class="acciones-btns">
-                  <button class="btn-edit" @click="editarUsuario(u)" title="Editar">✏️</button>
-                  <button
-                    class="btn-toggle"
-                    :class="u.activo ? 'desactivar' : 'activar'"
-                    @click="toggleEstado(u)"
-                    :title="u.activo ? 'Desactivar' : 'Activar'"
-                  >
-                    {{ u.activo ? '🔒' : '🔓' }}
-                  </button>
-                  <button class="btn-delete" @click="eliminarUsuario(u)" title="Eliminar">🗑️</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="sin-resultados" v-if="usuariosFiltrados.length === 0">
-          <span>🔍</span>
-          <p>No se encontraron usuarios con ese criterio.</p>
-        </div>
-      </div>
+              </span>
+              <span v-else class="text-muted">Sin rol</span>
+            </td>
+            <td>
+              <span :class="['badge', `badge-${usuario.estado}`]">
+                {{ usuario.estado || 'inactivo' }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <!-- BOTÓN MÁS DETALLES -->
+              <button 
+                class="btn btn-primary"
+                title="Ver detalles"
+                @click="openDetailsModal(usuario)"
+              >
+                Más detalles
+              </button>
 
-    </main>
+              <!-- BOTÓN EDITAR -->
+              <button 
+                class="btn btn-success"
+                title="Editar usuario"
+                @click="openEditModal(usuario)"
+              >
+                Editar
+              </button>
 
-    <!-- Modal crear/editar usuario -->
-    <div class="modal-overlay" v-if="modalVisible" @click.self="modalVisible = false">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>{{ modoEdicion ? '✏️ Editar usuario' : '➕ Nuevo usuario' }}</h2>
-          <button class="btn-cerrar-modal" @click="modalVisible = false">✕</button>
-        </div>
-        <div class="modal-body">
-          <div class="form-grid">
-            <div class="field">
-              <label>Nombre completo</label>
-              <input v-model="form.nombre" type="text" class="text-input" placeholder="Ej: Ana Flores"/>
+              <button 
+                v-if="usuario.estado === 'activo'"
+                class="btn btn-danger"
+                title="Bloquear"
+                @click="cambiarEstadoUsuario(usuario.id_usuario, 'inactivo')"
+              >
+                BLOQUEAR
+              </button>
+
+              <button 
+                v-if="usuario.estado !== 'activo'"
+                class="btn btn-success" 
+                title="Activar"
+                @click="cambiarEstadoUsuario(usuario.id_usuario, 'activo')"
+              >
+                ACTIVAR
+              </button>
+            </td>
+          </tr>
+          <tr v-if="!loading && filteredUsuarios.length === 0 && !errorMessage">
+            <td colspan="6" class="empty-message">No se encontraron usuarios con esos filtros.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modal de Detalles del Usuario -->
+    <div v-if="showDetailsModal" class="modal-overlay" @click.self="closeDetailsModal">
+      <div class="modal modal--large">
+        <button class="btn-close" @click="closeDetailsModal">✕</button>
+        <h2>Detalles del Usuario</h2>
+        <div v-if="selectedUsuario" class="details-grid">
+          <div class="detail-group">
+            <h3>Información Personal</h3>
+            <div class="detail-row">
+              <span class="detail-label">ID:</span>
+              <span class="detail-value">{{ selectedUsuario.id_usuario }}</span>
             </div>
-            <div class="field">
-              <label>Apellido</label>
-              <input v-model="form.apellido" type="text" class="text-input" placeholder="Ej: García"/>
+            <div class="detail-row">
+              <span class="detail-label">Nombre completo:</span>
+              <span class="detail-value">{{ `${selectedUsuario.nombre} ${selectedUsuario.ape_paterno} ${selectedUsuario.ape_materno}`.trim() }}</span>
             </div>
-            <div class="field full">
-              <label>Correo institucional</label>
-              <input v-model="form.email" type="email" class="text-input" placeholder="usuario@umsa.bo"/>
+            <div class="detail-row">
+              <span class="detail-label">Carnet de Identidad:</span>
+              <span class="detail-value">{{ selectedUsuario.ci || '-' }}</span>
             </div>
-            <div class="field">
-              <label>Rol</label>
-              <select v-model="form.rol" class="select-input">
-                <option value="estudiante">🎓 Estudiante</option>
-                <option value="docente">👨‍🏫 Docente</option>
-                <option value="admin">🗂️ Administrador</option>
-                <option value="superadmin">⚙️ Super Admin</option>
-              </select>
+            <div class="detail-row">
+              <span class="detail-label">Correo electrónico:</span>
+              <span class="detail-value">{{ selectedUsuario.correo_electronico }}</span>
             </div>
-            <div class="field">
-              <label>Carrera / Área</label>
-              <input v-model="form.carrera" type="text" class="text-input" placeholder="Ej: Informática"/>
+            <div class="detail-row">
+              <span class="detail-label">Celular:</span>
+              <span class="detail-value">{{ selectedUsuario.celular || '-' }}</span>
             </div>
-            <div class="field full" v-if="!modoEdicion">
-              <label>Contraseña temporal</label>
-              <input v-model="form.password" type="password" class="text-input" placeholder="••••••••"/>
+          </div>
+          <div class="detail-group">
+            <h3>Información del Sistema</h3>
+            <div class="detail-row">
+              <span class="detail-label">Estado:</span>
+              <span :class="['badge', `badge-${selectedUsuario.estado}`]">{{ selectedUsuario.estado }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Rol(es) asignado(s):</span>
+              <div class="roles-list">
+                <span v-for="inst in (selectedUsuario.instancias || [])" :key="inst.id_rol" class="badge-role">
+                  {{ inst.rol?.nombre || 'Sin rol' }}
+                </span>
+                <span v-if="!selectedUsuario.instancias || selectedUsuario.instancias.length === 0" class="text-muted">
+                  Sin roles asignados
+                </span>
+              </div>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Fecha de registro:</span>
+              <span class="detail-value">{{ formatDate(selectedUsuario.fecha_registro) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Última actualización:</span>
+              <span class="detail-value">{{ formatDate(selectedUsuario.updated_at) }}</span>
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button class="btn-cancelar" @click="modalVisible = false">Cancelar</button>
-          <button class="btn-guardar" @click="guardarUsuario">
-            {{ modoEdicion ? '✓ Guardar cambios' : '+ Crear usuario' }}
-          </button>
+        <div class="modal-actions">
+          <button class="btn-secondary" @click="closeDetailsModal">Cerrar</button>
         </div>
       </div>
     </div>
 
-    <!-- Toast -->
-    <div class="toast" :class="{ visible: toastVisible }">{{ toastMsg }}</div>
+    <!-- Modal de Crear/Editar Usuario -->
+    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+      <div class="modal">
+        <button class="btn-close" @click="closeModal">✕</button>
+        <h2>{{ isEditing ? 'Editar Usuario' : 'Crear Nuevo Usuario' }}</h2>
+        <p class="text-muted mb-4">
+          {{ isEditing ? 'Modifica los datos del usuario.' : 'Ingresa los datos para registrar un nuevo usuario en el sistema.' }}
+        </p>
 
-  </div>
+        <form @submit.prevent="guardarUsuario">
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="field-label">Nombre(s) *</label>
+              <input v-model="formData.nombre" type="text" class="input-base" required />
+            </div>
+            <div class="form-field">
+              <label class="field-label">Apellido Paterno</label>
+              <input v-model="formData.ape_paterno" type="text" class="input-base" />
+            </div>
+            <div class="form-field">
+              <label class="field-label">Apellido Materno</label>
+              <input v-model="formData.ape_materno" type="text" class="input-base" />
+            </div>
+            <div class="form-field">
+              <label class="field-label">Carnet de Identidad</label>
+              <input v-model="formData.ci" type="text" class="input-base" />
+            </div>
+          </div>
+
+          <div class="form-field mt-3">
+            <label class="field-label">Correo electrónico *</label>
+            <input 
+              v-model="formData.correo_electronico" 
+              type="email" 
+              class="input-base" 
+              placeholder="usuario@umsa.bo" 
+              required 
+              :disabled="isEditing" 
+            />
+            <small v-if="isEditing" class="text-muted">El correo no se puede modificar por seguridad.</small>
+          </div>
+
+          <div class="form-grid mt-3">
+            <div class="form-field" v-if="!isEditing">
+              <label class="field-label">Contraseña temporal *</label>
+              <input v-model="formData.password" type="password" class="input-base" required minlength="6" />
+            </div>
+            <div class="form-field">
+              <label class="field-label">Celular</label>
+              <input v-model="formData.celular" type="tel" class="input-base" />
+            </div>
+          </div>
+
+          <div class="form-field mt-3" v-if="!isEditing">
+            <label class="field-label">Rol inicial *</label>
+            <select v-model="formData.rol" class="input-base" required>
+              <option value="">Selecciona un rol...</option>
+              <option v-for="rol in rolesDisponibles" :key="rol.id_rol" :value="rol.nombre">
+                {{ rol.nombre }}
+              </option>
+            </select>
+          </div>
+
+            <div v-if="isEditing && selectedUsuario" class="form-field mt-3">
+    <label class="field-label">Rol asignado</label>
+
+            <div class="roles-selection">
+
+              <div 
+                v-for="rol in rolesDisponibles" 
+                :key="rol.id_rol" 
+                class="role-checkbox"
+              >
+
+                <input 
+                  type="radio"
+                  name="rolUsuario"
+                  :id="`rol-${rol.id_rol}`"
+                  :value="rol.nombre"
+                  v-model="formData.rol"
+                />
+
+                <label :for="`rol-${rol.id_rol}`">
+                  {{ rol.nombre }}
+                </label>
+
+              </div>
+
+            </div>
+          </div>
+          <div v-if="errorForm" class="form-error">⚠️ {{ errorForm }}</div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" @click="closeModal" :disabled="isSaving">Cancelar</button>
+            <button type="submit" class="btn-primary" :disabled="isSaving">
+              <span v-if="isSaving">Guardando...</span>
+              <span v-else>{{ isEditing ? 'Actualizar' : 'Crear Usuario' }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </SuperadminLayout>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import SuperadminLayout from '../../components/SuperadminLayout.vue'
+import usuariosService from '../../services/usuarios'
 
-const busqueda   = ref('')
-const filtroRol  = ref('todos')
-const modalVisible = ref(false)
-const modoEdicion  = ref(false)
-const toastVisible = ref(false)
-const toastMsg     = ref('')
+// ─── ESTADO GLOBAL ───
+const usuarios = ref([])
+const rolesDisponibles = ref([])
+const loading = ref(true)
+const isSaving = ref(false)
+const errorMessage = ref('')
+const errorForm = ref('')
 
-const form = ref({ nombre: '', apellido: '', email: '', rol: 'estudiante', carrera: '', password: '' })
-const usuarioEditando = ref(null)
+// ─── FILTROS ───
+const searchQuery = ref('')
+const filterEstado = ref('')
+const filterRol = ref('')
 
-const filtros = [
-  { value: 'todos',      label: 'Todos'       },
-  { value: 'estudiante', label: '🎓 Estudiantes' },
-  { value: 'docente',    label: '👨‍🏫 Docentes'   },
-  { value: 'admin',      label: '🗂️ Admins'      },
-  { value: 'superadmin', label: '⚙️ Super Admin' },
-]
+// ─── CONTROL DE MODALES ───
+const showModal = ref(false)
+const showDetailsModal = ref(false)
+const isEditing = ref(false)
 
-const usuarios = ref([
-  { id: 1,  nombre: 'Carolina Chávez',  carrera: 'Informática', email: 'carolina@est.umsa.bo',   rol: 'estudiante', activo: true,  fechaRegistro: '10/01/2025' },
-  { id: 2,  nombre: 'Juan Pérez',        carrera: 'Informática', email: 'juan.p@est.umsa.bo',     rol: 'estudiante', activo: true,  fechaRegistro: '12/01/2025' },
-  { id: 3,  nombre: 'María López',       carrera: 'Sistemas',    email: 'maria.l@est.umsa.bo',    rol: 'estudiante', activo: false, fechaRegistro: '15/01/2025' },
-  { id: 4,  nombre: 'Carlos Quispe',     carrera: 'Informática', email: 'carlos.q@est.umsa.bo',   rol: 'estudiante', activo: true,  fechaRegistro: '18/01/2025' },
-  { id: 5,  nombre: 'Lic. Henry Mamani', carrera: 'Docente LASIN', email: 'mamani@fcpn.umsa.bo',  rol: 'docente',    activo: true,  fechaRegistro: '05/01/2025' },
-  { id: 6,  nombre: 'Lic. Ana Quispe',   carrera: 'Docente LASIN', email: 'quispe@fcpn.umsa.bo',  rol: 'docente',    activo: true,  fechaRegistro: '05/01/2025' },
-  { id: 7,  nombre: 'Lic. Rosa Flores',  carrera: 'Docente LASIN', email: 'flores@fcpn.umsa.bo',  rol: 'docente',    activo: true,  fechaRegistro: '06/01/2025' },
-  { id: 8,  nombre: 'Administrador',     carrera: 'LASIN',       email: 'admin@lasin.umsa.bo',    rol: 'admin',      activo: true,  fechaRegistro: '01/01/2025' },
-  { id: 9,  nombre: 'Super Admin',       carrera: 'LASIN',       email: 'superadmin@lasin.umsa.bo', rol: 'superadmin', activo: true, fechaRegistro: '01/01/2025' },
-])
+const selectedUsuario = ref(null)
+const rolesOriginales = ref([])
 
-const usuariosFiltrados = computed(() =>
-  usuarios.value.filter(u => {
-    const matchBusqueda = u.nombre.toLowerCase().includes(busqueda.value.toLowerCase()) ||
-                          u.email.toLowerCase().includes(busqueda.value.toLowerCase())
-    const matchRol = filtroRol.value === 'todos' || u.rol === filtroRol.value
-    return matchBusqueda && matchRol
+const formData = ref({
+  nombre: '',
+  ape_paterno: '',
+  ape_materno: '',
+  ci: '',
+  correo_electronico: '',
+  password: '',
+  celular: '',
+  rol: ''
+})
+
+// ─── LÓGICA DE API ───
+
+async function cargarUsuarios() {
+  loading.value = true
+  errorMessage.value = ''
+  try {
+    usuarios.value = await usuariosService.listarUsuarios(0, 100)
+  } catch (error) {
+    console.error('Error cargando usuarios:', error)
+    errorMessage.value = error.response?.data?.detail || 'No se pudieron cargar los usuarios.'
+  } finally {
+    loading.value = false
+  }
+}
+
+async function cargarRoles() {
+  try {
+    rolesDisponibles.value = await usuariosService.listarRoles()
+  } catch (error) {
+    console.error('Error cargando roles:', error)
+  }
+}
+
+onMounted(async () => {
+  await cargarRoles()
+  await cargarUsuarios()
+})
+
+async function guardarUsuario() {
+  errorForm.value = ''
+  isSaving.value = true
+  
+  try {
+    if (isEditing.value) {
+      // Actualizar datos del usuario
+      await usuariosService.actualizarUsuario(selectedUsuario.value.id_usuario, {
+        nombre: formData.value.nombre,
+        ape_paterno: formData.value.ape_paterno,
+        ape_materno: formData.value.ape_materno,
+        ci: formData.value.ci,
+        celular: formData.value.celular,
+        rol: formData.value.rol
+      })
+
+      // Sincronizar roles
+      const rolesActuales = selectedUsuario.value.instancias?.map(inst => inst.rol?.nombre) || []
+      const rolesSeleccionados = rolesDisponibles.value.filter(r => {
+        const checkbox = document.querySelector(`#rol-${r.id_rol}`)
+        return checkbox && checkbox.checked
+      }).map(r => r.nombre)
+
+      // Revocar roles deseleccionados
+      for (const rol of rolesActuales) {
+        if (!rolesSeleccionados.includes(rol)) {
+          try {
+            await usuariosService.revocarRol(selectedUsuario.value.id_usuario, rol)
+          } catch (e) {
+            console.warn('No se pudo revocar rol:', rol)
+          }
+        }
+      }
+      
+      // Asignar roles nuevos
+      for (const rol of rolesSeleccionados) {
+        if (!rolesActuales.includes(rol)) {
+          try {
+            await usuariosService.asignarRol(selectedUsuario.value.id_usuario, rol)
+          } catch (e) {
+            console.warn('No se pudo asignar rol:', rol)
+          }
+        }
+      }
+
+    } else {
+      // Crear nuevo usuario - Fallback a endpoints de auth si es necesario
+      const datosNuevoUsuario = {
+        nombre: formData.value.nombre,
+        ape_paterno: formData.value.ape_paterno,
+        ape_materno: formData.value.ape_materno,
+        ci: formData.value.ci,
+        correo_electronico: formData.value.correo_electronico,
+        password: formData.value.password,
+        celular: formData.value.celular,
+        rol: formData.value.rol
+      }
+      
+      // Intentar mediante /users (si existe endpoint POST)
+      let nuevoUsuario = null
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/v1/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(datosNuevoUsuario)
+        })
+        nuevoUsuario = response.ok ? await response.json() : null
+      } catch (e) {
+        console.warn('Endpoint POST /users no disponible')
+      }
+
+      // Si no existe, usar auth/register/student
+      if (!nuevoUsuario) {
+        try {
+          const response = await fetch('http://127.0.0.1:8000/api/v1/auth/register/student', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosNuevoUsuario)
+          })
+          nuevoUsuario = response.ok ? await response.json() : null
+        } catch (e) {
+          errorForm.value = 'No se pudo crear el usuario. Verifica los datos.'
+          return
+        }
+      }
+
+      // Asignar el rol seleccionado
+      if (formData.value.rol && nuevoUsuario?.id_usuario) {
+        try {
+          await usuariosService.asignarRol(nuevoUsuario.id_usuario, formData.value.rol)
+        } catch (e) {
+          console.warn('No se pudo asignar rol inicial')
+        }
+      }
+    }
+
+    closeModal()
+    await cargarUsuarios()
+
+  } catch (error) {
+    console.error('Error:', error)
+    errorForm.value = error.response?.data?.detail || 'Error al guardar el usuario. Revisa los datos.'
+  } finally {
+    isSaving.value = false
+  }
+}
+
+async function cambiarEstadoUsuario(id_usuario, nuevoEstado) {
+  try {
+    await usuariosService.cambiarEstado(id_usuario, nuevoEstado)
+    await cargarUsuarios()
+  } catch (error) {
+    errorMessage.value = 'Error al cambiar el estado del usuario.'
+  }
+}
+
+function usuarioTieneRol(nombreRol) {
+  if (!selectedUsuario.value) return false
+  return selectedUsuario.value.instancias?.some(inst => inst.rol?.nombre === nombreRol) || false
+}
+
+function toggleRolUsuario(event, nombreRol) {
+  // La lógica se maneja en guardarUsuario
+}
+
+function formatDate(dateString) {
+  if (!dateString) return '-'
+  return new Date(dateString).toLocaleDateString('es-BO', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
   })
-)
-
-function contarPorRol(rol) {
-  if (rol === 'todos') return usuarios.value.length
-  return usuarios.value.filter(u => u.rol === rol).length
 }
 
-function iniciales(nombre) {
-  return nombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-}
+// ─── CONTROL DE INTERFAZ Y FILTROS ───
 
-function labelRol(rol) {
-  return { estudiante: '🎓 Estudiante', docente: '👨‍🏫 Docente', admin: '🗂️ Admin', superadmin: '⚙️ Super Admin' }[rol]
-}
+const filteredUsuarios = computed(() => {
+  let result = usuarios.value
 
-function colorRol(rol) {
-  return {
-    estudiante: 'linear-gradient(135deg,#0077b6,#00d4ff)',
-    docente:    'linear-gradient(135deg,#ffd700,#f59e0b)',
-    admin:      'linear-gradient(135deg,#22c55e,#16a34a)',
-    superadmin: 'linear-gradient(135deg,#a855f7,#7c3aed)',
-  }[rol]
-}
-
-function abrirModalNuevo() {
-  modoEdicion.value = false
-  form.value = { nombre: '', apellido: '', email: '', rol: 'estudiante', carrera: '', password: '' }
-  modalVisible.value = true
-}
-
-function editarUsuario(u) {
-  modoEdicion.value = true
-  usuarioEditando.value = u
-  form.value = { nombre: u.nombre, apellido: '', email: u.email, rol: u.rol, carrera: u.carrera, password: '' }
-  modalVisible.value = true
-}
-
-function guardarUsuario() {
-  if (!form.value.nombre || !form.value.email) {
-    mostrarToast('Por favor completa nombre y correo.')
-    return
+  // Filtro por Estado
+  if (filterEstado.value) {
+    result = result.filter(u => u.estado === filterEstado.value)
   }
-  if (modoEdicion.value) {
-    usuarioEditando.value.nombre  = form.value.nombre
-    usuarioEditando.value.email   = form.value.email
-    usuarioEditando.value.rol     = form.value.rol
-    usuarioEditando.value.carrera = form.value.carrera
-    mostrarToast('✅ Usuario actualizado correctamente.')
-  } else {
-    usuarios.value.push({
-      id: Date.now(),
-      nombre: form.value.nombre + ' ' + form.value.apellido,
-      carrera: form.value.carrera,
-      email: form.value.email,
-      rol: form.value.rol,
-      activo: true,
-      fechaRegistro: new Date().toLocaleDateString('es-BO'),
+  // Filtro por Rol
+  if (filterRol.value) {
+    result = result.filter(u => u.rol === filterRol.value)
+  }
+
+  // Filtro por Búsqueda (Texto)
+  const query = searchQuery.value.toLowerCase().trim()
+  if (query) {
+    result = result.filter(u => {
+      const nombreCompleto = `${u.nombre || ''} ${u.ape_paterno || ''} ${u.ape_materno || ''}`.trim().toLowerCase()
+      const ci = (u.ci || '').toLowerCase()
+      const correo = (u.correo_electronico || '').toLowerCase()
+      return nombreCompleto.includes(query) || ci.includes(query) || correo.includes(query)
     })
-    mostrarToast('✅ Usuario creado correctamente.')
   }
-  modalVisible.value = false
-}
+  return result
+})
 
-function toggleEstado(u) {
-  u.activo = !u.activo
-  mostrarToast(u.activo ? `✅ ${u.nombre} activado.` : `🔒 ${u.nombre} desactivado.`)
-}
-
-function eliminarUsuario(u) {
-  if (confirm(`¿Eliminar a ${u.nombre}? Esta acción no se puede deshacer.`)) {
-    usuarios.value = usuarios.value.filter(x => x.id !== u.id)
-    mostrarToast('🗑️ Usuario eliminado.')
+function openCreateModal() {
+  isEditing.value = false
+  selectedUsuario.value = null
+  rolesOriginales.value = []
+  formData.value = {
+    nombre: '',
+    ape_paterno: '',
+    ape_materno: '',
+    ci: '',
+    correo_electronico: '',
+    password: '',
+    celular: '',
+    rol: ''
   }
+  errorForm.value = ''
+  showModal.value = true
 }
 
-function mostrarToast(msg) {
-  toastMsg.value = msg
-  toastVisible.value = true
-  setTimeout(() => toastVisible.value = false, 3000)
+function openEditModal(usuario) {
+  isEditing.value = true
+  selectedUsuario.value = usuario
+  rolesOriginales.value = usuario.instancias?.map(inst => inst.rol?.nombre) || []
+  
+  formData.value = {
+    nombre: usuario.nombre || '',
+    ape_paterno: usuario.ape_paterno || '',
+    ape_materno: usuario.ape_materno || '',
+    ci: usuario.ci || '',
+    correo_electronico: usuario.correo_electronico || '',
+    password: '',
+    celular: usuario.celular || '',
+    rol: ''
+  }
+  errorForm.value = ''
+  showModal.value = true
+}
+
+function openDetailsModal(usuario) {
+  selectedUsuario.value = usuario
+  showDetailsModal.value = true
+}
+
+function closeModal() {
+  showModal.value = false
+  selectedUsuario.value = null
+}
+
+function closeDetailsModal() {
+  showDetailsModal.value = false
+  selectedUsuario.value = null
 }
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
-* { box-sizing: border-box; margin: 0; padding: 0; }
-.dashboard { font-family: 'Sora', sans-serif; display: flex; min-height: 100vh; background: #0d1b2e; color: #f0f8ff; }
-.sidebar { width: 260px; flex-shrink: 0; background: #0a1628; border-right: 1px solid rgba(0,212,255,0.08); display: flex; flex-direction: column; padding: 28px 20px; }
-.sidebar-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 0 8px; }
-.logo-box { width: 40px; height: 40px; background: linear-gradient(135deg,#0077b6,#00d4ff); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
-.sidebar-logo strong { display: block; font-size: 15px; font-weight: 700; }
-.sidebar-logo span { font-size: 11px; color: #7a96b0; }
-.sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-.nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; color: #7a96b0; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; }
-.nav-item:hover { background: rgba(0,212,255,0.06); color: #f0f8ff; }
-.nav-item.router-link-active { background: rgba(0,119,182,0.2); color: #00d4ff; }
-.sidebar-footer { border-top: 1px solid rgba(0,212,255,0.08); padding-top: 20px; }
-.user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg,#a855f7,#0077b6); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
-.user-info strong { display: block; font-size: 13px; }
-.user-info span { font-size: 11px; color: #7a96b0; }
-.btn-logout { width: 100%; display: flex; align-items: center; gap: 8px; padding: 9px 14px; background: transparent; border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; color: #7a96b0; font-family: 'Sora', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
-.btn-logout:hover { border-color: rgba(239,68,68,0.4); color: #fca5a5; }
-.main { flex: 1; padding: 36px 40px; overflow-y: auto; }
-.top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-.top-bar h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
-.top-bar p { font-size: 14px; color: #7a96b0; }
-.btn-nuevo { padding: 11px 22px; background: linear-gradient(135deg,#0077b6,#00b4d8); border: none; border-radius: 10px; color: white; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-.btn-nuevo:hover { box-shadow: 0 6px 20px rgba(0,180,216,0.4); }
-.filtros { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
-.search-wrap { position: relative; }
-.search-wrap svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: #7a96b0; pointer-events: none; }
-.search-wrap input { padding: 10px 16px 10px 38px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; color: #f0f8ff; font-family: 'Sora', sans-serif; font-size: 13px; outline: none; width: 210px; }
-.search-wrap input::placeholder { color: #7a96b0; }
-.search-wrap input:focus { border-color: rgba(0,212,255,0.4); }
-.filtro-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-.filtro-tab { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 100px; color: #7a96b0; font-family: 'Sora', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.2s; }
-.filtro-tab:hover { color: #f0f8ff; border-color: rgba(0,212,255,0.2); }
-.filtro-tab.active { background: rgba(0,119,182,0.2); border-color: rgba(0,212,255,0.35); color: #00d4ff; }
-.filtro-count { background: rgba(255,255,255,0.08); border-radius: 100px; padding: 1px 6px; font-size: 10px; }
-.panel { background: #0a1628; border: 1px solid rgba(0,212,255,0.08); border-radius: 16px; overflow: hidden; }
-.tabla { width: 100%; border-collapse: collapse; }
-.tabla thead tr { border-bottom: 1px solid rgba(0,212,255,0.08); }
-.tabla th { padding: 13px 16px; text-align: left; font-size: 11px; font-weight: 600; color: #7a96b0; text-transform: uppercase; letter-spacing: 0.8px; }
-.th-center { text-align: center !important; }
-.tabla tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
-.tabla tbody tr:last-child { border-bottom: none; }
-.tabla tbody tr:hover { background: rgba(0,212,255,0.03); }
-.tabla td { padding: 13px 16px; font-size: 13px; vertical-align: middle; }
-.text-gris { color: #7a96b0; font-size: 12px; }
-.user-cell { display: flex; align-items: center; gap: 10px; }
-.user-avatar-sm { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; color: white; }
-.user-cell strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-.user-cell span { font-size: 11px; color: #7a96b0; }
-.badge-rol { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 100px; }
-.badge-rol.estudiante { background: rgba(0,212,255,0.12); color: #00d4ff; }
-.badge-rol.docente    { background: rgba(255,215,0,0.12);  color: #ffd700; }
-.badge-rol.admin      { background: rgba(34,197,94,0.12);  color: #22c55e; }
-.badge-rol.superadmin { background: rgba(168,85,247,0.12); color: #a855f7; }
-.badge-estado { font-size: 11px; font-weight: 600; }
-.badge-estado.activo   { color: #22c55e; }
-.badge-estado.inactivo { color: #7a96b0; }
-.acciones-btns { display: flex; gap: 6px; justify-content: center; }
-.btn-edit, .btn-toggle, .btn-delete { width: 32px; height: 32px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: transparent; font-size: 14px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
-.btn-edit:hover   { background: rgba(0,212,255,0.12); border-color: rgba(0,212,255,0.3); }
-.btn-toggle:hover { background: rgba(255,215,0,0.12); border-color: rgba(255,215,0,0.3); }
-.btn-delete:hover { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.3); }
-.sin-resultados { text-align: center; padding: 48px; color: #7a96b0; }
-.sin-resultados span { font-size: 36px; display: block; margin-bottom: 12px; }
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 100; }
-.modal { background: #0a1628; border: 1px solid rgba(0,212,255,0.15); border-radius: 20px; width: 480px; overflow: hidden; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid rgba(0,212,255,0.08); }
-.modal-header h2 { font-size: 16px; font-weight: 700; }
-.btn-cerrar-modal { background: transparent; border: none; color: #7a96b0; font-size: 16px; cursor: pointer; }
-.btn-cerrar-modal:hover { color: #f0f8ff; }
-.modal-body { padding: 24px; }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.field.full { grid-column: 1 / -1; }
-.field label { display: block; font-size: 11px; font-weight: 600; color: #7a96b0; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
-.text-input { width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; color: #f0f8ff; font-family: 'Sora', sans-serif; font-size: 13px; outline: none; transition: all 0.2s; }
-.text-input:focus { border-color: rgba(0,212,255,0.4); background: rgba(0,119,182,0.08); }
-.text-input::placeholder { color: #7a96b0; }
-.select-input { width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; color: #f0f8ff; font-family: 'Sora', sans-serif; font-size: 13px; outline: none; }
-.select-input option { background: #0a1628; }
-.modal-footer { display: flex; gap: 12px; padding: 16px 24px; border-top: 1px solid rgba(0,212,255,0.08); }
-.btn-cancelar { flex: 1; padding: 11px; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; color: #7a96b0; font-family: 'Sora', sans-serif; font-size: 13px; cursor: pointer; }
-.btn-guardar { flex: 2; padding: 11px; background: linear-gradient(135deg,#0077b6,#00b4d8); border: none; border-radius: 10px; color: white; font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
-.btn-guardar:hover { box-shadow: 0 6px 20px rgba(0,180,216,0.35); }
-.toast { position: fixed; bottom: 28px; right: 28px; background: #0a1628; border: 1px solid rgba(0,212,255,0.3); color: #00d4ff; padding: 14px 22px; border-radius: 12px; font-size: 13px; font-weight: 500; transform: translateY(80px); opacity: 0; transition: all 0.3s; z-index: 200; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
-.toast.visible { transform: translateY(0); opacity: 1; }
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.filters-group {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-box:focus-within {
+  border-color: #023e8a;
+}
+
+.search-box svg {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.input-base {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #1e293b;
+  width: 100%;
+  font-family: inherit;
+}
+
+.select-base {
+  padding: 8px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  color: #1e293b;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+}
+
+.select-base:focus {
+  border-color: #023e8a;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #7700ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.btn-primary:hover {
+  background: #0077b6;
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-success {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #03ea44;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.btn-success:hover {
+  background: #0bbb17;
+}
+
+.btn-success:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: white;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #f8fafc;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.table-container {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+}
+
+.data-table th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: #64748b;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.data-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.empty-message {
+  text-align: center;
+  color: #64748b;
+  padding: 32px;
+  font-weight: 500;
+}
+
+.text-danger {
+  color: #ef4444;
+}
+
+.text-muted {
+  color: #64748b;
+}
+
+.text-info {
+  color: #0284c7;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.btn-icon:hover {
+  transform: scale(1.15);
+  background: #f1f5f9;
+}
+
+.text-primary {
+  color: #023e8a;
+}
+
+.text-success {
+  color: #10b981;
+}
+
+.text-warning {
+  color: #f59e0b;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.badge-activo {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-pendiente {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-bloqueado {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-inactivo {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-role {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #e0e7ff;
+  color: #3730a3;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+
+.roles-cell {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.roles-list {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+/* Modales */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(2px);
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.modal {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  width: 600px;
+  max-width: 90%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.modal--large {
+  width: 800px;
+}
+
+.btn-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #94a3b8;
+}
+
+.btn-close:hover {
+  color: #1e293b;
+}
+
+.modal h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.mb-4 {
+  margin-bottom: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-field {
+  margin-bottom: 16px;
+}
+
+.mt-3 {
+  margin-top: 16px;
+}
+
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #1e293b;
+}
+
+.form-field .input-base {
+  width: 100%;
+  padding: 10px 14px;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-field .input-base:focus {
+  border-color: #023e8a;
+  box-shadow: 0 0 0 3px rgba(2, 62, 138, 0.1);
+  outline: none;
+}
+
+.form-field .input-base:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.form-error {
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  color: #fca5a5;
+  font-size: 13px;
+  margin-top: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin: 24px 0;
+}
+
+.detail-group h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 12px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 16px;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #64748b;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  color: #1e293b;
+  word-break: break-word;
+  text-align: right;
+  flex: 1;
+}
+
+.roles-selection {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.role-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.role-checkbox input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: #023e8a;
+  width: 16px;
+  height: 16px;
+}
+
+.role-checkbox label {
+  cursor: pointer;
+  font-size: 14px;
+  color: #1e293b;
+}
+
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters-group {
+    flex-direction: column;
+  }
+
+  .search-box {
+    max-width: none;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .detail-value {
+    text-align: left;
+  }
+
+  .modal {
+    width: 100%;
+    padding: 24px;
+  }
+
+  .modal--large {
+    width: 100%;
+  }
+}
 </style>

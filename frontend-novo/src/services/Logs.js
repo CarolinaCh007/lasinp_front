@@ -1,7 +1,8 @@
-import api from './auth.js'
+
+import api from './api'
 
 export const logsService = {
-  getAll() {
-    return api.get('/logs')
+  getAll(params = {}) {
+    return api.get('/users/logs', { params })
   }
 }

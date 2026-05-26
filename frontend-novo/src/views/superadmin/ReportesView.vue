@@ -1,115 +1,79 @@
 <template>
-  <div class="dashboard">
-    <!-- Barra lateral (idéntica al DashboardView) -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h2>LASIN 2.0</h2>
+
+  <SuperadminLayout>
+    <div class="toolbar">
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input
+          v-model="searchQuery"
+          type="text"
+          class="input-base"
+          placeholder="Buscar logs..."
+        />
       </div>
-      <nav class="sidebar-nav">
-        <a
-          v-for="item in menuItems"
-          :key="item.label"
-          href="#"
-          class="nav-item"
-          :class="{ active: isActive(item.route) }"
-          @click.prevent="navigate(item.route)"
-        >
-          <span class="nav-icon" v-html="item.icon"></span>
-          <span>{{ item.label }}</span>
-        </a>
-      </nav>
-    </aside>
-
-    <!-- Contenido principal -->
-    <div class="main">
-      <header class="topbar">
-        <h1>Gestión de Logs</h1>
-        <div class="user-info">
-          <span>Super Admin</span>
-        </div>
-      </header>
-
-      <section class="content">
-        <!-- Barra de herramientas -->
-        <div class="toolbar">
-          <div class="search-box">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              v-model="searchQuery"
-              type="text"
-              class="input-base"
-              placeholder="Buscar logs..."
-            />
-          </div>
-        </div>
-
-        <!-- Tabla de Logs -->
-        <div class="table-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>id_log </th>
-                <th>id_usuario</th>
-                <th>Nombre Usuario</th>
-                <th>Accion</th>
-                <th>Tabla afectada</th>
-                <th>Fecha</th>
-                <th>Hora</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="loading">
-                <td colspan="5" class="empty-message">Cargando logs desde la base de datos...</td>
-              </tr>
-              <tr v-if="!loading && errorMessage">
-                <td colspan="5" class="empty-message">{{ errorMessage }}</td>
-              </tr>
-              <tr v-for="log in filteredLogs" :key="log.id_log">
-                <td>{{ log.id_log || '-' }}</td>
-                <td>{{ log.id_usuario || '-' }}</td>
-                <td>
-                  {{ `${log.usuario?.nombre || ''} ${log.usuario?.ape_paterno || ''} ${log.usuario?.ape_materno || ''}`.trim() }}
-                </td>
-                <td>{{ log.accion || '-' }}</td>
-                <td>{{ log.tabla_afectada || '-' }}</td>
-                <td>{{ log.fecha || '-' }}</td>
-                <td>{{ log.hora || '-' }}</td>
-
-                <td class="actions-cell">
-                  <button class="btn-icon" title="Editar" @click="openEditModal(log)">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg>
-                  </button>
-                  <button class="btn-icon btn-icon--danger" title="Eliminar" @click="confirmDelete(log)">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-              <tr v-if="filteredLogs.length === 0">
-                <td colspan="5" class="empty-message">No se encontraron logs.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
     </div>
-  </div>  
+
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>id_log </th>
+            <th>id_usuario</th>
+            <th>Nombre Usuario</th>
+            <th>Accion</th>
+            <th>Tabla afectada</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="loading">
+            <td colspan="5" class="empty-message">Cargando logs desde la base de datos...</td>
+          </tr>
+          <tr v-if="!loading && errorMessage">
+            <td colspan="5" class="empty-message">{{ errorMessage }}</td>
+          </tr>
+          <tr v-for="log in filteredLogs" :key="log.id_log">
+            <td>{{ log.id_log || '-' }}</td>
+            <td>{{ log.id_usuario || '-' }}</td>
+            <td>
+              {{ `${log.usuario?.nombre || ''} ${log.usuario?.ape_paterno || ''} ${log.usuario?.ape_materno || ''}`.trim() }}
+            </td>
+            <td>{{ log.accion || '-' }}</td>
+            <td>{{ log.tabla_afectada || '-' }}</td>
+            <td>{{ log.fecha || '-' }}</td>
+            <td>{{ log.hora || '-' }}</td>
+
+            <td class="actions-cell">
+              <button class="btn-icon" title="Editar" @click="openEditModal(log)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </button>
+              <button class="btn-icon btn-icon--danger" title="Eliminar" @click="confirmDelete(log)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+              </button>
+            </td>
+          </tr>
+          <tr v-if="filteredLogs.length === 0">
+            <td colspan="5" class="empty-message">No se encontraron logs.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </SuperadminLayout>
 </template>
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import SuperadminLayout from '../../components/SuperadminLayout.vue'
 import { logsService } from '../../services/Logs.js'
-
-const router = useRouter()
-const route = useRoute()
 
 const logs = ref([])
 // Aquí llega la información real desde el backend.
@@ -130,6 +94,7 @@ const formData = ref({
   hora: '',
   accion: ''
 })
+
 
 async function cargarLogs() {
   loading.value = true
@@ -155,44 +120,10 @@ async function cargarLogs() {
   }
 }
 
+
 onMounted(() => {
   cargarLogs()
 })
-
-// Elementos del menú lateral
-const menuItems = [
-  {
-    label: 'Dasboard',
-    route: '/superadmin/dashboard',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'
-  },
-  {
-    label: 'Perfil',
-    route: '/superadmin/Perfil',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'
-  },
-  
-  {
-    label: 'Gestion de Cursos',
-    route: '/superadmin/cursos',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>'
-  },
-  {
-    label: 'Gestion de Docentes',
-    route: '/superadmin/Docentes',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
-  },
-  {
-    label: 'Gestion de Estudiantes',
-    route: '/superadmin/estudiantes',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
-  },
-  {
-    label: 'Reportes',
-    route: '/superadmin/reportes',
-    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>'
-  }
-]
 
 // Filtrado de logs
 const filteredLogs = computed(() => {
@@ -220,13 +151,6 @@ const filteredLogs = computed(() => {
 
 // Título del modal
 
-// Navegación
-function isActive(itemRoute) {
-  return route.path === itemRoute
-}
-function navigate(path) {
-  if (route.path !== path) router.push(path)
-}
 
 // CRUD
 function openCreateModal() {
