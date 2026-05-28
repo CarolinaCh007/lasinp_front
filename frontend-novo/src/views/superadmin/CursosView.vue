@@ -115,7 +115,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import SuperadminLayout from '../../components/SuperadminLayout.vue'
-import { cursosService } from '../../services/cursos.js'
+import { cursosService } from '../../services/cursoService.js'
 
 const cursos = ref([])
 // Aquí llega la información real desde el backend.

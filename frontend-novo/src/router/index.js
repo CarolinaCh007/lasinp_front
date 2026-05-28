@@ -2,124 +2,37 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { authService } from '../services/auth.js'
 import LoginView from '../views/LoginView.vue'
 import PrincipalView from '../views/PrincipalView.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
-      path: '/',
-      redirect: '/Principal'
-    },
-    {
-      path: '/Principal',
-      name: 'principal',
-      component: PrincipalView
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: LoginView
-    },
+    { path: '/', redirect: '/Principal' },
+    { path: '/Principal', name: 'principal', component: PrincipalView },
+    { path: '/login',     name: 'login',     component: LoginView },
 
     // ── Estudiante ──────────────────────────────────────
-    {
-      path: '/estudiante/dashboard',
-      component: () => import('../views/estudiante/DashboardView.vue'),
-      meta: { requiresAuth: true, rol: 'estudiante' }
-    },
-    {
-      path: '/estudiante/cursos',
-      component: () => import('../views/estudiante/CursosView.vue'),
-      meta: { requiresAuth: true, rol: 'estudiante' }
-    },
-    {
-      path: '/estudiante/historial',
-      component: () => import('../views/estudiante/HistorialView.vue'),
-      meta: { requiresAuth: true, rol: 'estudiante' }
-    },
-    {
-      path: '/estudiante/perfil',
-      component: () => import('../views/estudiante/PerfilView.vue'),
-      meta: { requiresAuth: true, rol: 'estudiante' }
-    },
+    { path: '/estudiante/dashboard', component: () => import('../views/estudiante/DashboardView.vue'), meta: { requiresAuth: true, rol: 'estudiante' } },
+    { path: '/estudiante/cursos',    component: () => import('../views/estudiante/CursosView.vue'),    meta: { requiresAuth: true, rol: 'estudiante' } },
+    { path: '/estudiante/historial', component: () => import('../views/estudiante/HistorialView.vue'), meta: { requiresAuth: true, rol: 'estudiante' } },
+    { path: '/estudiante/perfil',    component: () => import('../views/estudiante/PerfilView.vue'),    meta: { requiresAuth: true, rol: 'estudiante' } },
 
     // ── Docente ─────────────────────────────────────────
-    {
-      path: '/docente/dashboard',
-      component: () => import('../views/docente/DashboardView.vue'),
-      meta: { requiresAuth: true, rol: 'docente' }
-    },
-    
-    {
-      path: '/docente/calificaciones',
-      component: () => import('../views/docente/CalificacionesView.vue'),
-      meta: { requiresAuth: true, rol: 'docente' }
-    },
-    {
-      path: '/docente/comunicados',
-      component: () => import('../views/docente/ComunicadosView.vue'),
-      meta: { requiresAuth: true, rol: 'docente' }
-    },
+    { path: '/docente/dashboard',      component: () => import('../views/docente/DashboardView.vue'),      meta: { requiresAuth: true, rol: 'docente' } },
+    { path: '/docente/calificaciones', component: () => import('../views/docente/CalificacionesView.vue'), meta: { requiresAuth: true, rol: 'docente' } },
+    { path: '/docente/comunicados',    component: () => import('../views/docente/ComunicadosView.vue'),    meta: { requiresAuth: true, rol: 'docente' } },
 
     // ── Admin ────────────────────────────────────────────
-    {
-      path: '/admin/dashboard',
-      component: () => import('../views/admin/DashboardView.vue'),
-      meta: { requiresAuth: true, rol: 'admin' }
-    },
-    {
-      path: '/admin/preinscritos',
-      component: () => import('../views/admin/PreinscritosView.vue'),
-      meta: { requiresAuth: true, rol: 'admin' }
-    },
-    {
-      path: '/admin/reportes',
-      component: () => import('../views/admin/ReportesView.vue'),
-      meta: { requiresAuth: true, rol: 'admin' }
-    },
+    { path: '/admin/dashboard',    component: () => import('../views/admin/DashboardView.vue'),      meta: { requiresAuth: true, rol: 'admin' } },
+    { path: '/admin/preinscritos', component: () => import('../views/admin/PreinscritosView.vue'),   meta: { requiresAuth: true, rol: 'admin' } },
+    { path: '/admin/reportes',     component: () => import('../views/admin/ReportesView.vue'),       meta: { requiresAuth: true, rol: 'admin' } },
 
     // ── Superadmin ───────────────────────────────────────
-    {
-      path: '/superadmin/dashboard',
-      component: () => import('../views/superadmin/DashboardView.vue'),
-      meta: { requiresAuth: true, rol: 'superadmin' }
-    },
-    {
-      path: '/superadmin/usuarios',
-      component: () => import('../views/superadmin/UsuariosView.vue'),
-      meta: { requiresAuth: true, rol: 'superadmin' }
-    },
-    {
-      path: '/superadmin/cursos',
-      component: () => import('../views/superadmin/CursosView.vue'),
-      meta: { requiresAuth: true, rol: 'superadmin' }
-    },
-    {
-      path: '/superadmin/reportes',
-      component: () => import('../views/superadmin/ReportesView.vue'),
-      meta: { requiresAuth: true, rol: 'superadmin' }
-    },
-    {
-      path: '/superadmin/auditoria',
-      component: () => import('../views/superadmin/AuditoriaView.vue'),
-      meta: { requiresAuth: true, rol: 'superadmin' }
-    },
-    {
-      path: '/superadmin/Perfil',
-      component: () => import('../views/superadmin/PerfilView.vue'),
-      meta: { requiresAuth: true, rol: 'superadmin' }
-    },
-
-    
-   
-
-    {
-      path: '/superadmin/Auditoria',
-      component: () => import('../views/superadmin/AuditoriaView.vue'),
-      meta: { requiresAuth: true, rol: 'superadmin' }
-    },
-
-   
-
+    { path: '/superadmin/dashboard', name: 'DashboardSuperadmin', component: () => import('../views/superadmin/DashboardSuperadmin.vue'), meta: { requiresAuth: true, rol: 'superadmin' } },
+    { path: '/superadmin/usuarios',  component: () => import('../views/superadmin/UsuariosView.vue'),  meta: { requiresAuth: true, rol: 'superadmin' } },
+    { path: '/superadmin/cursos',    component: () => import('../views/superadmin/CursosAdmin.vue'),   meta: { requiresAuth: true, rol: 'superadmin' } },
+    { path: '/superadmin/reportes',  component: () => import('../views/superadmin/ReportesView.vue'),  meta: { requiresAuth: true, rol: 'superadmin' } },
+    { path: '/superadmin/auditoria', component: () => import('../views/superadmin/AuditoriaView.vue'), meta: { requiresAuth: true, rol: 'superadmin' } },
+    { path: '/superadmin/perfil',    component: () => import('../views/superadmin/PerfilView.vue'),    meta: { requiresAuth: true, rol: 'superadmin' } }
   ]
 })
 
