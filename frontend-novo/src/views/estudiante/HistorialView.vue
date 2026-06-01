@@ -26,6 +26,10 @@
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           Historial y Notas
         </router-link>
+        <router-link to="/estudiante/mis-cursos" class="nav-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
+          Mis Cursos
+        </router-link>
       </nav>
       <div class="sidebar-footer">
         <div class="user-info">

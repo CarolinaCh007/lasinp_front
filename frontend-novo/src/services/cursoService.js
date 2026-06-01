@@ -1,10 +1,18 @@
+import axios from 'axios'
 import api from './api'
+ 
+const publicApi = axios.create({
+  baseURL: 'http://127.0.0.1:8000/api/v1',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
  
 const cursoService = {
   listar(params = {}) {
     return api.get('/courses/cursos/', { params })
   },
- 
   obtener(id) {
     return api.get(`/courses/cursos/${id}`)
   },

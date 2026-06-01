@@ -9,12 +9,18 @@ const router = createRouter({
     { path: '/', redirect: '/Principal' },
     { path: '/Principal', name: 'principal', component: PrincipalView },
     { path: '/login',     name: 'login',     component: LoginView },
+    { path: '/registro-step1', name: 'registro-step1', component: () => import('../views/auth/RegistroStep1View.vue')},
+    { path: '/registro-step2',name: 'registro-step2',component: () => import('../views/auth/RegistroStep2View.vue')},
+    { path: '/verify-email', name: 'verify-email',component: () => import('../views/auth/RegistroStep2View.vue')},
+    { path: '/forgot-password',name: 'forgot-password',component: () => import('../views/auth/ForgotPasswordView.vue')},
+    { path: '/reset-password', name: 'reset-password', component: () => import('../views/auth/ResetPasswordView.vue') },
 
     // ── Estudiante ──────────────────────────────────────
     { path: '/estudiante/dashboard', component: () => import('../views/estudiante/DashboardView.vue'), meta: { requiresAuth: true, rol: 'estudiante' } },
     { path: '/estudiante/cursos',    component: () => import('../views/estudiante/CursosView.vue'),    meta: { requiresAuth: true, rol: 'estudiante' } },
     { path: '/estudiante/historial', component: () => import('../views/estudiante/HistorialView.vue'), meta: { requiresAuth: true, rol: 'estudiante' } },
     { path: '/estudiante/perfil',    component: () => import('../views/estudiante/PerfilView.vue'),    meta: { requiresAuth: true, rol: 'estudiante' } },
+    { path: '/estudiante/mis-cursos', component: () => import('../views/estudiante/Mis_CursosView.vue'), meta: { requiresAuth: true, rol: 'estudiante' } },
 
     // ── Docente ─────────────────────────────────────────
     { path: '/docente/dashboard',      component: () => import('../views/docente/DashboardView.vue'),      meta: { requiresAuth: true, rol: 'docente' } },

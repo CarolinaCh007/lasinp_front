@@ -17,7 +17,9 @@
         <li><a href="#cursos" @click="closeMenu">Cursos</a></li>
         <li><a href="#nosotros" @click="closeMenu">Nosotros</a></li>
         <li><a href="#testimonios" @click="closeMenu">Testimonios</a></li>
-        <li><a href="#contacto" class="btn-nav" @click="closeMenu">Contacto</a></li>
+        <li><a href="#contacto"  @click="closeMenu">Contacto</a></li>
+       <li><router-link to="/registro-step1" class="btn-danger" @click="closeMenu">Registrate</router-link></li>
+        <li><router-link to="/login" class="btn-primary" @click="closeMenu">Iniciar Sesión</router-link></li>
       </ul>
       <div class="hamburger" :class="{ active: menuOpen }" @click="toggleMenu" aria-label="Menú">
         <span></span><span></span><span></span>
@@ -53,103 +55,125 @@
     </div>
   </section>
 
-  <!-- ============ CURSOS ============ -->
-  <section class="section" id="cursos">
-    <div class="section-inner">
-      <div class="text-center">
-        <span class="section-label">Nuestra Oferta Académica</span>
-        <h2 class="section-title">Cursos Online & Presenciales</h2>
-        <p class="section-subtitle mx-auto">Elige la modalidad que mejor se adapte a tu ritmo de vida. Todos nuestros programas incluyen mentoría personalizada y acceso a nuestra plataforma exclusiva.</p>
-      </div>
-      <div class="courses-grid">
-        <!-- Curso Online 1 -->
-        <div class="course-card">
-          <span class="tag tag-online">🌐 Online</span>
-          <div class="course-icon online">🐍</div>
-          <h3>Python para Data Science</h3>
-          <p>Domina Python, Pandas, NumPy y visualización de datos con proyectos reales del sector tecnológico.</p>
-          <ul class="course-features">
-            <li>✅ 12 semanas</li>
-            <li>✅ En vivo</li>
-            <li>✅ Proyectos reales</li>
-            <li>✅ Mentoría 1:1</li>
-          </ul>
-          <div class="price">$497 <small>USD</small></div>
+
+
+
+
+
+
+
+  
+
+  <!-- ============ CURSOS (TARJETAS MEJORADAS) ============ -->
+<section class="section" id="cursos">
+  <div class="section-inner">
+    <div class="text-center">
+      <span class="section-label">Nuestra Oferta Académica</span>
+      <h2 class="section-title">Cursos Online & Presenciales</h2>
+      <p class="section-subtitle mx-auto">Elige la modalidad que mejor se adapte a tu ritmo de vida. Todos nuestros programas incluyen mentoría personalizada y acceso a nuestra plataforma exclusiva.</p>
+    </div>
+
+
+
+
+
+
+
+
+    <div class="courses-grid">
+      <!-- Tarjeta generada dinámicamente -->
+      <div
+        class="course-card"
+          v-for="curso in cursosFiltrados"
+          :key="curso.id"
+          @click="verDetalle(curso)"
+      >
+        <!--<span
+          class="tag"
+          :class="curso.modalidad === 'Online' ? 'tag-online' : 'tag-offline'"
+        >
+          {{ curso.modalidad === 'Online' ? ' Online' : 'Presencial' }}
+        </span>
+        <div
+          class="course-icon"
+          :class="curso.modalidad === 'Online' ? 'online' : 'offline'"
+        >
+          {{ curso.icono }}
+        </div>-->
+        
+        <h3>{{ curso.nombre }}</h3>
+        <div class="course-meta">
+          <span class="meta-sigla"><strong>Sigla:</strong> {{ curso.sigla }}</span>
+          <span class="meta-fecha"><strong>Inicio:</strong> {{ curso.fecha_Inicio }}</span>
+          <span class="meta-cupos"><strong>Cupos:</strong> {{ curso.cupos }}</span>
         </div>
-        <!-- Curso Presencial 1 -->
-        <div class="course-card gold-border">
-          <span class="tag tag-offline">🏫 Presencial</span>
-          <div class="course-icon offline">🔐</div>
-          <h3>Ciberseguridad Avanzada</h3>
-          <p>Formación intensiva en seguridad informática, ethical hacking y defensa de infraestructuras críticas.</p>
-          <ul class="course-features">
-            <li>✅ 16 semanas</li>
-            <li>✅ Labs equipados</li>
-            <li>✅ Simulaciones reales</li>
-            <li>✅ Certificación CEH</li>
-          </ul>
-          <div class="price">$897 <small>USD</small></div>
-        </div>
-        <!-- Curso Online 2 -->
-        <div class="course-card">
-          <span class="tag tag-online">🌐 Online</span>
-          <div class="course-icon online">☁️</div>
-          <h3>Cloud & DevOps Engineering</h3>
-          <p>Aprende AWS, Docker, Kubernetes y CI/CD. Conviértete en el perfil más demandado del mercado.</p>
-          <ul class="course-features">
-            <li>✅ 10 semanas</li>
-            <li>✅ Labs en la nube</li>
-            <li>✅ Certificación AWS</li>
-            <li>✅ Soporte 24/7</li>
-          </ul>
-          <div class="price">$597 <small>USD</small></div>
-        </div>
-        <!-- Curso Presencial 2 -->
-        <div class="course-card gold-border">
-          <span class="tag tag-offline">🏫 Presencial</span>
-          <div class="course-icon offline">🤖</div>
-          <h3>Inteligencia Artificial</h3>
-          <p>Deep Learning, NLP y Computer Vision en nuestros laboratorios con GPUs de última generación.</p>
-          <ul class="course-features">
-            <li>✅ 14 semanas</li>
-            <li>✅ Hardware especializado</li>
-            <li>✅ Proyecto final</li>
-            <li>✅ Bolsa de trabajo</li>
-          </ul>
-          <div class="price">$997 <small>USD</small></div>
-        </div>
-        <!-- Curso Online 3 -->
-        <div class="course-card">
-          <span class="tag tag-online">🌐 Online</span>
-          <div class="course-icon online">📱</div>
-          <h3>Desarrollo Web Full Stack</h3>
-          <p>React, Node.js, TypeScript y bases de datos. Construye aplicaciones web completas desde cero.</p>
-          <ul class="course-features">
-            <li>✅ 12 semanas</li>
-            <li>✅ Clases grabadas</li>
-            <li>✅ Portfolio incluido</li>
-            <li>✅ Comunidad activa</li>
-          </ul>
-          <div class="price">$447 <small>USD</small></div>
-        </div>
-        <!-- Curso Presencial 3 -->
-        <div class="course-card gold-border">
-          <span class="tag tag-offline">🏫 Presencial</span>
-          <div class="course-icon offline">🎮</div>
-          <h3>Desarrollo de Videojuegos</h3>
-          <p>Unity, Unreal Engine 5 y diseño 3D. Crea tu propio videojuego en nuestros estudios equipados.</p>
-          <ul class="course-features">
-            <li>✅ 18 semanas</li>
-            <li>✅ Estudio de gaming</li>
-            <li>✅ Publicación en Steam</li>
-            <li>✅ Networking industry</li>
-          </ul>
-          <div class="price">$1,197 <small>USD</small></div>
+        <div class="price">{{ curso.costo }} <small>Bs</small></div>
+        <div class="course-actions">
+          <button class="btn btn-outline btn-sm" @click="openModal(curso)"> Más detalles</button>
+          
+          <router-link to="/registro-step1" class="btn btn-primary btn-sm" @click="closeMenu">Pre-inscribirme</router-link>
         </div>
       </div>
     </div>
-  </section>
-
+  </div>
+</section>
+<!-- ============ MODAL DE DETALLES ============ -->
+<Transition name="modal">
+  <div v-if="cursoSeleccionado" class="modal-overlay" @click.self="closeModal">
+    <div class="modal-content">
+      <button class="modal-close" @click="closeModal">&times;</button>
+      <div class="modal-header">
+        <span class="tag" :class="cursoSeleccionado.modalidad === 'Online' ? 'tag-online' : 'tag-offline'">
+          {{ cursoSeleccionado.modalidad === 'Online' ? ' Online' : 'Presencial' }}
+        </span>
+        <h2>{{ cursoSeleccionado.nombre }}</h2>
+        <div class="modal-sigla">Sigla: {{ cursoSeleccionado.sigla }}</div>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Nivel</span>
+            <span class="detail-value">{{ cursoSeleccionado.nivel }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Fecha Inicio</span>
+            <span class="detail-value">{{ cursoSeleccionado.fecha_Inicio }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Fecha Fin</span>
+            <span class="detail-value">{{ cursoSeleccionado.fecha_Fin }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Duración</span>
+            <span class="detail-value">{{ cursoSeleccionado.duracion }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Estado</span>
+            <span class="detail-value" :class="{ 'estado-activo': cursoSeleccionado.estado === 'Inscripciones abiertas' }">
+              {{ cursoSeleccionado.estado }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Costo</span>
+            <span class="detail-value">{{ cursoSeleccionado.costo }} USD</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Cupos Totales</span>
+            <span class="detail-value">{{ cursoSeleccionado.cuposTotales }}</span>
+          </div>
+        </div>
+        <div class="modal-description">
+          <h4>Descripción</h4>
+          <p>{{ cursoSeleccionado.descripcion }}</p>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" @click="preInscribir(cursoSeleccionado); closeModal()">✍️ Pre-inscribirme ahora</button>
+          <button class="btn btn-outline" @click="closeModal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</Transition>
   <!-- ============ ESTADÍSTICAS ============ -->
   <div class="stats-section">
     <div class="section-inner">
@@ -184,17 +208,17 @@
       </div>
       <div class="about-grid">
         <div class="about-card">
-          <div class="about-icon">🎯</div>
+          <div class="about-icon"></div>
           <h3>Misión</h3>
           <p>Brindar educación tecnológica de vanguardia, accesible y de calidad, formando profesionales íntegros capaces de transformar el mundo digital.</p>
         </div>
         <div class="about-card">
-          <div class="about-icon">🔭</div>
+          <div class="about-icon"></div>
           <h3>Visión</h3>
           <p>Ser el referente global en educación informática, expandiendo nuestras fronteras y metodologías a cada rincón del planeta.</p>
         </div>
         <div class="about-card">
-          <div class="about-icon">💎</div>
+          <div class="about-icon"></div>
           <h3>Valores</h3>
           <p>Excelencia, innovación, inclusión, ética profesional y aprendizaje continuo como pilares de nuestra comunidad.</p>
         </div>
@@ -246,8 +270,14 @@
       Solicita información sin compromiso. Nuestros asesores académicos te guiarán para encontrar el curso perfecto para ti.
     </p>
     <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
-      <a href="#" class="btn btn-primary" style="font-size:1.05rem; padding:0.95rem 2.4rem;" @click.prevent>📩 Solicitar Información</a>
-      <a href="#" class="btn btn-gold" style="font-size:1.05rem; padding:0.95rem 2.4rem;" @click.prevent>📞 Llamar Ahora</a>
+      <a 
+  href="https://wa.me/59177862862" 
+  target="_blank"
+  class="btn btn-primary" 
+  style="font-size:1.05rem; padding:0.95rem 2.4rem;"
+>
+  Solicitar Información
+</a>
     </div>
   </div>
 
@@ -279,10 +309,11 @@
       <div class="footer-col">
         <h4>Contacto</h4>
         <ul>
-          <li><a href="#">📧 info@laboratoriosuperior.edu</a></li>
-          <li><a href="#">📞 +1 (555) 123-4567</a></li>
-          <li><a href="#">📍 Av. Tecnológica 456, CDMX</a></li>
-          <li><a href="#">💬 WhatsApp</a></li>
+          <li><a href="#">📧 lasinbolivia@gmail.com</a></li>
+          <li><a href="https://wa.me/59177862862" >📞 +591 77862862</a></li>
+          <li><a href="https://www.google.com/maps/place/Plaza+del+Bicentenario,+Av.+Villaz%C3%B3n,+La+Paz/@-16.5050962,-68.1310741,438m/data=!3m1!1e3!4m6!3m5!1s0x915f2064dbe8d2d7:0x279c365d06503d5f!8m2!3d-16.5051809!4d-68.1301462!16s%2Fg%2F11b8t9t8mc?entry=ttu&g_ep=EgoyMDI2MDUyNi4wIKXMDSoASAFQAw%3D%3D"
+             target="_blank">📍 Av. Villazón N° 1995, Plaza del Bicentenario</a></li>
+          <li><a href="https://wa.me/59177862862" target="_blank">💬 WhatsApp</a></li>
         </ul>
       </div>
     </div>
@@ -293,7 +324,119 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+  // --- Datos de los cursos ---
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
+import cursoService from '../services/cursoService'
+const router = useRouter()
+const busqueda = ref('')
+const categoriaActiva = ref('Todos')
+const cursoSeleccionado = ref(null)
+const loading = ref(true)
+const errorMsg = ref('')
+const handleImage = (event) => {
+  const file = event.target.files[0]
+
+  if (file) {
+    console.log(file)
+  }
+}
+const categorias = ['Todos', 'Desarrollo Web', 'Data Science', 'Ciberseguridad', 'Cloud', 'IA', 'Ofimática']
+
+const cursos = ref([
+  { id: 1, nombre: 'Introducción a Python', 
+  sigla: 'PY-101',
+  descripcion: 'Aprende Python desde cero enfocado en análisis de datos y visualización.', 
+  docente: 'Lic. Mamani', 
+  fechaInicio: '01/03/2025',
+  fecha_Inicio: '01/03/2025',
+  fecha_Fin: '30/05/2025',
+  duracion: '3 meses', 
+  nivel: 'Básico',
+  modalidad: 'Online',
+  cupos: 8, 
+  cuposTotales: 8,
+  precio: 350, 
+  costo: 350,
+  categoria: 'Data Science', 
+  estado: 'Inscripciones abiertas' },
+
+])
+
+const cursosFiltrados = computed(() => {
+  const texto = busqueda.value.trim().toLowerCase()
+  return cursos.value.filter(curso => {
+    const categoria = (curso.categoria || '').toString()
+    const nombre = (curso.nombre || '').toString().toLowerCase()
+    const descripcion = (curso.descripcion || '').toString().toLowerCase()
+    const coincideCategoria = categoriaActiva.value === 'Todos' || categoria === categoriaActiva.value
+    const coincideBusqueda = !texto || nombre.includes(texto) || descripcion.includes(texto)
+    return coincideCategoria && coincideBusqueda
+  })
+})
+function mapearCursoFromAPI(curso) {
+  const cupos = (curso.cupo_maximo || 0) - (curso.cupo_usado || 0)
+  const estado = cupos <= 0 ? 'lleno' : curso.estado || 'disponible'
+
+  return {
+    id: curso.id_curso || curso.id,
+    nombre: curso.nombre_curso || curso.nombre,
+    sigla: curso.sigla || curso.codigo || '',
+    descripcion: curso.descripcion || '',
+    docente: curso.docente?.nombre || 'Docente',
+    fechaInicio: curso.fecha_inicio ? new Date(curso.fecha_inicio).toLocaleDateString('es-BO') : 'Por confirmar',
+    fecha_Inicio: curso.fecha_inicio ? new Date(curso.fecha_inicio).toLocaleDateString('es-BO') : 'Por confirmar',
+    fecha_Fin: curso.fecha_fin ? new Date(curso.fecha_fin).toLocaleDateString('es-BO') : 'Por confirmar',
+    duracion: curso.duracion ? `${curso.duracion} semanas` : 'N/A',
+    nivel: curso.nivel || 'General',
+    modalidad: curso.modalidad || 'Online',
+    cupos: curso.cupo_maximo || curso.cupos_totales || 0,
+    cuposTotales: curso.cupo_maximo || curso.cupos_totales || 0,
+    precio: curso.costo || curso.precio || 0,
+    costo: curso.costo || curso.precio || 0,
+    especialidad: curso.especialidad || 'Otros',
+    estado: estado,
+  }
+}
+async function cargarCursos() {
+  loading.value = true
+  errorMsg.value = ''
+  try {
+    const response = await cursoService.listarPublico()
+    const dataPayload = Array.isArray(response)
+      ? response
+      : response.data || response.data?.data || response.data?.results || response.data?.cursos || []
+    const cursosAPI = Array.isArray(dataPayload) ? dataPayload : []
+    cursos.value = cursosAPI.map(mapearCursoFromAPI)
+  } catch (error) {
+    console.error('[PrincipalView] Error al cargar cursos:', error)
+    errorMsg.value = 'No se pudieron cargar los cursos. Intenta más tarde.'
+  } finally {
+    loading.value = false
+  }
+}
+function verDetalle(curso) {
+  preinscribirse(curso)
+}
+function preinscribirse(curso) {
+  if (curso.estado === 'Activo') return
+  cursoSeleccionado.value = curso
+}
+
+const openModal = (curso) => {
+  cursoSeleccionado.value = curso
+}
+
+const closeModal = () => {
+  cursoSeleccionado.value = null
+}
+
+// Simulación de pre-inscripción
+const preInscribir = (curso) => {
+  alert(`Pre-inscripción realizada para el curso: ${curso.nombre} (${curso.sigla})`)
+  // Aquí puedes redirigir a un formulario o hacer una petición HTTP
+}
+
 
 // --- Estado del menú y scroll ---
 const menuOpen = ref(false)
@@ -441,6 +584,7 @@ onMounted(() => {
   window.addEventListener('scroll', handleScroll)
   startParticles()
   setupStatsObserver()
+  cargarCursos()
   nextTick(() => {
     setupCardsAnimation()
   })
@@ -458,12 +602,165 @@ onUnmounted(() => {
 </script>
 
 <style>
+  /* ============ TARJETAS DE CURSOS (MEJORADAS) ============ */
+.course-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  color: var(--gray-600);
+}
+
+.course-meta span {
+  background: var(--gray-100);
+  padding: 0.25rem 0.7rem;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.course-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.2rem;
+}
+
+.btn-sm {
+  padding: 0.5rem 1.1rem;
+  font-size: 0.85rem;
+}
+
+/* ============ MODAL ============ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 2rem;
+}
+
+.modal-content {
+  background: #848383;
+  border-radius: var(--radius-xl);
+  max-width: 700px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 2.5rem;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn 0.3s ease-out;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: var(--gray-600);
+  transition: color var(--transition);
+  line-height: 1;
+}
+
+.modal-close:hover {
+  color: var(--primary);
+}
+
+.modal-header {
+  margin-bottom: 1.8rem;
+}
+
+.modal-header h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.8rem;
+  margin: 0.5rem 0 0.2rem;
+}
+
+.modal-sigla {
+  color: var(--gray-600);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.8rem;
+}
+
+.detail-item {
+  background: var(--gray-100);
+  padding: 0.8rem;
+  border-radius: var(--radius-sm);
+}
+
+.detail-label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gray-600);
+  margin-bottom: 0.2rem;
+  font-weight: 600;
+}
+
+.detail-value {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.estado-activo {
+  color: #22c55e;
+}
+
+.modal-description {
+  margin-bottom: 2rem;
+}
+
+.modal-description h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  margin-bottom: 0.5rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Transición del modal */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
 /* ============ ESTILOS GLOBALES ============ */
 :root {
   --primary: #0a0e27;
   --secondary: #1a1f4e;
   --accent: #4f6ef7;
-  --accent-glow: #7b93ff;
+  --accent-glow: #ffffff;
   --gold: #d4a853;
   --gold-light: #f0d78c;
   --white: #ffffff;
@@ -546,10 +843,10 @@ body {
   left: 0;
   width: 100%;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(148, 243, 222, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(10, 14, 39, 0.06);
+  border-bottom: 1px solid rgba(254, 247, 247, 0.869);
   transition: all var(--transition);
   padding: 0 2rem;
 }
@@ -604,7 +901,7 @@ body {
 
 
 @keyframes logoPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(123, 147, 255, 0.7); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7); }
   50% { box-shadow: 0 0 0 16px rgba(123, 147, 255, 0); }
 }
 
@@ -646,9 +943,6 @@ body {
   transition: width var(--transition);
 }
 
-.nav-links a:hover {
-  color: var(--accent);
-}
 
 .nav-links a:hover::after {
   width: 100%;
@@ -656,7 +950,7 @@ body {
 
 .btn-nav {
   background: var(--primary);
-  color: #fff !important;
+
   padding: 0.6rem 1.5rem;
   border-radius: 50px;
   font-weight: 600 !important;
@@ -664,13 +958,6 @@ body {
   letter-spacing: -0.01em;
   box-shadow: 0 4px 18px rgba(10, 14, 39, 0.25);
   white-space: nowrap;
-}
-
-.btn-nav:hover {
-  background: var(--accent) !important;
-  color: #fff !important;
-  box-shadow: 0 8px 30px rgba(79, 110, 247, 0.4);
-  transform: translateY(-2px);
 }
 
 .btn-nav::after {
@@ -800,7 +1087,7 @@ body {
 }
 
 @keyframes dotBlink {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(79, 110, 247, 0.7); }
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
   50% { opacity: 0.4; box-shadow: 0 0 0 10px rgba(79, 110, 247, 0); }
 }
 
@@ -815,7 +1102,7 @@ body {
 }
 
 .hero h1 .highlight {
-  background: linear-gradient(135deg, var(--accent), #6c5ce7);
+  background: linear-gradient(135deg, var(--accent), #030303);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -853,13 +1140,11 @@ body {
 
 .btn-primary {
   background: var(--primary);
-  color: #fff;
-  box-shadow: 0 8px 30px rgba(10, 14, 39, 0.3);
+  color: var(--white);
 }
 
 .btn-primary:hover {
-  background: var(--accent);
-  box-shadow: 0 14px 40px rgba(79, 110, 247, 0.45);
+
   transform: translateY(-3px);
 }
 
@@ -877,7 +1162,7 @@ body {
 
 .btn-gold {
   background: linear-gradient(135deg, var(--gold), #c8963e);
-  color: #fff;
+
   box-shadow: var(--shadow-gold);
 }
 
@@ -912,10 +1197,10 @@ body {
 
 .floating-card {
   position: absolute;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(0,212,255,0.06);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(19, 45, 100, 0.6);
   border-radius: var(--radius);
   padding: 1.2rem 1.5rem;
   box-shadow: var(--shadow-lg);
@@ -1004,7 +1289,7 @@ body {
 }
 
 .course-card {
-  background: #fff;
+  background: rgb(202, 202, 202);
   border-radius: var(--radius-lg);
   padding: 2rem;
   border: 1px solid var(--gray-200);

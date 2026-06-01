@@ -1,46 +1,37 @@
 <template>
   <div class="login-page">
-
     <!-- Panel izquierdo — Hero -->
-    <div class="login-hero">
+    <div class="login-hero" aria-labelledby="hero-title">
       <div class="hero-content">
-        <div class="hero-logo">
-          <div class="sidebar-logo__box">
-            <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              <path d="M2 17l10 5 10-5"/>
-              <path d="M2 12l10 5 10-5"/>
-            </svg>
-          </div>
-          <div>
-            <strong class="hero-logo__title">LASIN 2.01</strong>
-            <span class="hero-logo__sub">Laboratorio Superior de Informática</span>
-          </div>
-        </div>
+        <!-- Logo mejorado con enlace y contenido real -->
 
-        <h1 class="hero-title">
-          Gestión académica <br/>
-          <span class="text-cyan">inteligente</span>
+        <!-- Título principal con ID para accesibilidad -->
+        <h1 id="hero-title" class="hero-title">
+          LASIN 2.01
         </h1>
-        <p class="hero-desc">
-          Plataforma oficial del LASIN — UMSA. Administra cursos,
-          estudiantes y docentes desde un solo lugar.
-        </p>
-
-        <div class="hero-stats">
-          <div class="hero-stat">
+        <br>
+        <h2 class="hero-subtitle">
+          LABORATORIO SUPERIOR
+          <br>
+          DE INFORMÁTICA
+        </h2>
+        <br>
+        <ul class="hero-stats">
+          <li class="hero-stat">
             <span class="hero-stat__num text-cyan">9+</span>
             <span class="hero-stat__label">Rutas de aprendizaje</span>
-          </div>
-          <div class="hero-stat">
+          </li>
+
+          <li class="hero-stat">
             <span class="hero-stat__num text-gold">100k+</span>
             <span class="hero-stat__label">Estudiantes formados</span>
-          </div>
-          <div class="hero-stat">
+          </li>
+
+          <li class="hero-stat">
             <span class="hero-stat__num text-success">24/7</span>
             <span class="hero-stat__label">Disponibilidad</span>
-          </div>
-        </div>
+          </li>
+        </ul>
       </div>
     </div>
 
@@ -55,13 +46,8 @@
 
         <!-- Selector de rol -->
         <div class="role-grid">
-          <button
-            v-for="r in roles"
-            :key="r.value"
-            class="role-btn"
-            :class="{ active: rolSeleccionado === r.value }"
-            @click="rolSeleccionado = r.value"
-          >
+          <button v-for="r in roles" :key="r.value" class="role-btn" :class="{ active: rolSeleccionado === r.value }"
+            @click="rolSeleccionado = r.value">
             <span class="role-btn__icon">{{ r.icono }}</span>
             <span class="role-btn__label">{{ r.label }}</span>
           </button>
@@ -72,15 +58,10 @@
           <label class="field-label">Correo institucional</label>
           <div class="search-wrap">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-              <polyline points="22,6 12,13 2,6"/>
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+              <polyline points="22,6 12,13 2,6" />
             </svg>
-            <input
-              v-model="email"
-              type="email"
-              class="input-base"
-              :placeholder="placeholderEmail"
-            />
+            <input v-model="email" type="email" class="input-base" :placeholder="placeholderEmail" />
           </div>
         </div>
 
@@ -88,16 +69,11 @@
           <label class="field-label">Contraseña</label>
           <div class="search-wrap">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
-            <input
-              v-model="password"
-              :type="mostrarPassword ? 'text' : 'password'"
-              class="input-base"
-              placeholder="••••••••"
-              @keyup.enter="ingresar"
-            />
+            <input v-model="password" :type="mostrarPassword ? 'text' : 'password'" class="input-base"
+              placeholder="••••••••" @keyup.enter="ingresar" />
           </div>
           <button class="btn-toggle-pass" @click="mostrarPassword = !mostrarPassword">
             {{ mostrarPassword ? '🙈 Ocultar' : '👁️ Mostrar' }}
@@ -110,11 +86,7 @@
         </div>
 
         <!-- Botón -->
-        <button
-          class="btn-primary w-full mt-4"
-          :disabled="cargando"
-          @click="ingresar"
-        >
+        <button class="btn-primary w-full mt-4" :disabled="cargando" @click="ingresar">
           <span v-if="!cargando">Ingresar al sistema →</span>
           <span v-else class="spinner"></span>
         </button>
@@ -124,6 +96,15 @@
           <a href="#" class="link-cyan">Contacta al administrador</a>
         </p>
 
+        <p class="login-footer-text">
+          ¿No tienes cuenta?
+          <router-link to="/registro-step1" class="link-cyan">Regístrate aquí</router-link>
+        </p>
+        <p class="login-footer-text">
+          ¿Olvidaste tu contraseña?
+          <router-link to="/forgot-password" class="link-cyan">Restablecer contraseña</router-link>
+        </p>
+
       </div>
     </div>
 
@@ -131,42 +112,25 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authService } from '../services/auth.js'
 
 const router = useRouter()
 
-const email           = ref('')
-const password        = ref('')
-const rolSeleccionado = ref('estudiante')
-const cargando        = ref(false)
-const errorMsg        = ref('')
+const email = ref('')
+const password = ref('')
+// no role selection at login; backend returns user role
+const cargando = ref(false)
+const errorMsg = ref('')
 const mostrarPassword = ref(false)
-
-const roles = [
-  { value: 'estudiante', label: 'Estudiante',   icono: '🎓' },
-  { value: 'docente',    label: 'Docente',       icono: '👨‍🏫' },
-  { value: 'admin',      label: 'Administrador', icono: '🗂️' },
-  { value: 'superadmin', label: 'Super Admin',   icono: '⚙️' },
-]
 
 const rutasPorRol = {
   estudiante: '/estudiante/dashboard',
-  docente:    '/docente/dashboard',
-  admin:      '/admin/dashboard',
+  docente: '/docente/dashboard',
+  admin: '/admin/dashboard',
   superadmin: '/superadmin/dashboard',
 }
-
-const placeholderEmail = computed(() => {
-  const map = {
-    estudiante: 'usuario@est.umsa.bo',
-    docente:    'docente@fcpn.umsa.bo',
-    admin:      'admin@lasin.umsa.bo',
-    superadmin: 'superadmin@lasin.umsa.bo',
-  }
-  return map[rolSeleccionado.value]
-})
 
 function validarFormulario() {
   if (!email.value.trim()) {
@@ -196,15 +160,8 @@ async function ingresar() {
     const data = await authService.login(email.value, password.value)
     const rol = data.rol
 
-    // Verificar que el rol del backend coincide con el seleccionado
     if (rol === 'sin_rol') {
       errorMsg.value = 'Tu cuenta no tiene rol asignado. Contacta al administrador.'
-      authService.logout()
-      return
-    }
-
-    if (rol !== rolSeleccionado.value) {
-      errorMsg.value = `Tu rol es ${rol}, no ${rolSeleccionado.value}.`
       authService.logout()
       return
     }
@@ -241,16 +198,18 @@ async function ingresar() {
 .login-hero {
   flex: 1;
   background:
-    linear-gradient(135deg, rgba(0,119,182,0.15) 0%, rgba(0,212,255,0.05) 100%),
+    linear-gradient(135deg, rgba(0, 119, 182, 0.15) 0%, rgba(0, 212, 255, 0.05) 100%),
     var(--color-surface);
   border-right: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: left;
   padding: 60px 48px;
 }
 
-.hero-content    { max-width: 400px; }
+.hero-content {
+  max-width: 700px;
+}
 
 .hero-logo {
   display: flex;
@@ -272,11 +231,18 @@ async function ingresar() {
 }
 
 .hero-title {
-  font-size: 38px;
+  font-size: 4rem;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.1;
   margin-bottom: 18px;
-  letter-spacing: -0.5px;
+}
+
+.hero-subtitle {
+  font-size: 3.2rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--color-cyan);
+  margin-bottom: 5px;
 }
 
 .hero-desc {
@@ -288,12 +254,28 @@ async function ingresar() {
 
 .hero-stats {
   display: flex;
-  gap: 32px;
+  gap: 50px;
+  margin-top: 20px;
+  padding: 0;
+  list-style: none;
 }
 
-.hero-stat { display: flex; flex-direction: column; gap: 4px; }
-.hero-stat__num   { font-size: 28px; font-weight: 800; line-height: 1; }
-.hero-stat__label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-stat__num {
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.hero-stat__label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+}
 
 .login-form-wrap {
   width: 480px;
@@ -304,9 +286,19 @@ async function ingresar() {
   padding: 60px 48px;
 }
 
-.login-form { width: 100%; }
-.form-head       { margin-bottom: 28px; }
-.form-head h2    { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+.login-form {
+  width: 100%;
+}
+
+.form-head {
+  margin-bottom: 28px;
+}
+
+.form-head h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
 
 .role-grid {
   display: grid;
@@ -321,7 +313,7 @@ async function ingresar() {
   align-items: center;
   gap: 6px;
   padding: 14px 10px;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
   color: var(--text-muted);
@@ -330,20 +322,43 @@ async function ingresar() {
   transition: var(--transition-normal);
 }
 
-.role-btn:hover { border-color: rgba(0,212,255,0.25); color: var(--text-primary); }
+
+
+
+
+
+
+.role-btn:hover {
+  border-color: rgba(0, 212, 255, 0.25);
+  color: var(--text-primary);
+}
 
 .role-btn.active {
-  background: rgba(0,119,182,0.15);
+  background: rgba(0, 119, 182, 0.15);
   border-color: var(--color-cyan);
   color: var(--color-cyan);
 }
 
-.role-btn__icon  { font-size: 22px; }
-.role-btn__label { font-size: 12px; font-weight: 600; }
+.role-btn__icon {
+  font-size: 22px;
+}
 
-.mt-3 { margin-top: 14px; }
-.mt-4 { margin-top: 20px; }
-.w-full { width: 100%; }
+.role-btn__label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mt-3 {
+  margin-top: 14px;
+}
+
+.mt-4 {
+  margin-top: 20px;
+}
+
+.w-full {
+  width: 100%;
+}
 
 .field-label {
   display: block;
@@ -357,7 +372,7 @@ async function ingresar() {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-soft);
   border-radius: 8px;
   padding: 10px 14px;
@@ -384,13 +399,15 @@ async function ingresar() {
   padding: 0;
 }
 
-.btn-toggle-pass:hover { color: var(--color-cyan); }
+.btn-toggle-pass:hover {
+  color: var(--color-cyan);
+}
 
 .login-error {
   margin-top: 14px;
   padding: 12px 16px;
-  background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.2);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: 8px;
   color: #fca5a5;
   font-size: 13px;
@@ -408,19 +425,26 @@ async function ingresar() {
   cursor: pointer;
 }
 
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 .spinner {
   display: inline-block;
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(255,255,255,0.3);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: white;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 .login-footer-text {
   margin-top: 20px;
@@ -435,8 +459,23 @@ async function ingresar() {
   font-weight: 600;
 }
 
-.text-cyan { color: var(--color-cyan, #00d4ff); }
-.text-gold { color: #f59e0b; }
-.text-success { color: #10b981; }
-.text-muted { color: var(--text-muted, #888); }
+.text-cyan {
+  color: var(--color-cyan, #ffffff);
+
+  display: block;
+  width: 100%;
+  padding-top: 10px;
+}
+
+.text-gold {
+  color: #f59e0b;
+}
+
+.text-success {
+  color: #10b981;
+}
+
+.text-muted {
+  color: var(--text-muted, #888);
+}
 </style>

@@ -27,6 +27,10 @@
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           Historial y Notas
         </router-link>
+        <router-link to="/estudiante/mis-cursos" class="nav-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
+          Mis Cursos
+        </router-link>
       </nav>
       <div class="sidebar-footer">
         <div class="user-info">
@@ -66,8 +70,37 @@
         </div>
       </div>
 
+      <!-- Loading -->
+      <div v-if="loading" class="sin-resultados">
+        <span>⏳</span>
+        <p>Cargando cursos...</p>
+      </div>
+
+      <!-- Error -->
+      <div v-else-if="errorMsg" class="sin-resultados">
+        <span>⚠️</span>
+        <p>{{ errorMsg }}</p>
+      </div>
+
+
+
+
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
       <!-- Grid de cursos -->
-      <div class="cursos-grid">
+      <div v-else class="cursos-grid">
         <div
           class="curso-card"
           v-for="curso in cursosFiltrados"
@@ -75,7 +108,7 @@
           @click="verDetalle(curso)"
         >
           <div class="curso-header" :style="{ background: curso.color }">
-            <span class="curso-emoji">{{ curso.icono }}</span>
+
             <span class="curso-categoria">{{ curso.categoria }}</span>
           </div>
           <div class="curso-body">
@@ -91,23 +124,23 @@
             </div>
             <div class="curso-footer">
               <div class="curso-precio">Bs. {{ curso.precio }}</div>
-              <span class="curso-badge" :class="curso.estado">
-                {{ curso.estado === 'disponible' ? 'Disponible' : curso.estado === 'proximo' ? 'Próximo' : 'Lleno' }}
-              </span>
+              <!-- <span class="curso-badge" :class="curso.estado">
+                {{ curso.estado === 'activo' ? 'Disponible' : curso.estado === 'inactivo' ? 'Próximo' : 'Lleno' }}
+              </span> -->
             </div>
             <button
               class="btn-preinscribir"
-              :disabled="curso.estado === 'lleno'"
+              :disabled="curso.estado === 'activo'"
               @click.stop="preinscribirse(curso)"
             >
-              {{ curso.estado === 'lleno' ? 'Sin cupos' : 'Preinscribirse' }}
+              {{ curso.estado === 'activo' ? 'Sin cupos' : 'Preinscribirse' }}
             </button>
           </div>
         </div>
       </div>
 
       <!-- Sin resultados -->
-      <div class="sin-resultados" v-if="cursosFiltrados.length === 0">
+      <div v-if="!loading && !errorMsg && cursosFiltrados.length === 0" class="sin-resultados">
         <span>🔍</span>
         <p>No se encontraron cursos con ese criterio.</p>
       </div>
@@ -123,12 +156,39 @@
           <strong>{{ cursoSeleccionado?.nombre }}</strong>
           <span>Bs. {{ cursoSeleccionado?.precio }}</span>
         </div>
+        <div class="modal-curso">
+          <span>Inicio: {{ cursoSeleccionado?.fechaInicio }}</span>
+        </div>
+        <div    >
+          <img src="@/assets/QR_LASIN.jpg" aria-orientation="vertical" style="width: 100%; border-radius: 5px; margin-top: 20px;margin-right: 20%; " />
+        </div>
+        <div class="upload-container">
+          <input
+            type="file"
+            id="foto"
+            accept="image/*"
+            @change="handleImage"
+            hidden
+          />
+
+          <label for="foto" class="upload-box">
+            <div class="upload-content">
+              <p>Haz clic para subir  tu comprobante</p>
+              <small>PNG, JPG o JPEG</small>
+            </div>
+          </label>
+        </div>
+        <div>
+          _____________________________________
+        </div>
         <p class="modal-aviso">
-          ⚠️ Recuerda que debes apersonarte al LASIN para confirmar tu pago y formalizar la inscripción.
+           Tu comprobante de pago sera verificado en menos de 1 hora.
+
         </p>
+        
         <div class="modal-btns">
           <button class="btn-cancelar" @click="modalVisible = false">Cancelar</button>
-          <button class="btn-confirmar" @click="confirmarPreinscripcion">Confirmar</button>
+          <button class="btn-confirmar" @click="confirmarPreinscripcion">Enviar</button>
         </div>
       </div>
     </div>
@@ -137,53 +197,92 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import cursoService from '../../services/cursoService'
 
 const router = useRouter()
-
 const busqueda = ref('')
 const categoriaActiva = ref('Todos')
 const modalVisible = ref(false)
 const cursoSeleccionado = ref(null)
+const loading = ref(true)
+const errorMsg = ref('')
+const handleImage = (event) => {
+  const file = event.target.files[0]
+
+  if (file) {
+    console.log(file)
+  }
+}
 
 const categorias = ['Todos', 'Desarrollo Web', 'Data Science', 'Ciberseguridad', 'Cloud', 'IA', 'Ofimática']
 
 const cursos = ref([
-  { id: 1, nombre: 'Python para Data Science', descripcion: 'Aprende Python desde cero enfocado en análisis de datos y visualización.', docente: 'Lic. Mamani', fechaInicio: '01/03/2025', duracion: '3 meses', cupos: 8, precio: 350, categoria: 'Data Science', icono: '🐍', color: 'linear-gradient(135deg,#1d6fc4,#0ea5e9)', estado: 'disponible' },
-  { id: 2, nombre: 'React & Angular Avanzado', descripcion: 'Domina los frameworks más demandados del mercado para desarrollo web moderno.', docente: 'Lic. Quispe', fechaInicio: '05/03/2025', duracion: '4 meses', cupos: 5, precio: 400, categoria: 'Desarrollo Web', icono: '⚛️', color: 'linear-gradient(135deg,#a855f7,#7c3aed)', estado: 'disponible' },
-  { id: 3, nombre: 'Ethical Hacking & Pentesting', descripcion: 'Fundamentos de ciberseguridad ofensiva con laboratorios prácticos.', docente: 'Lic. Torrez', fechaInicio: '10/03/2025', duracion: '3 meses', cupos: 0, precio: 450, categoria: 'Ciberseguridad', icono: '🔐', color: 'linear-gradient(135deg,#ef4444,#b91c1c)', estado: 'lleno' },
-  { id: 4, nombre: 'Azure Fundamentals', descripcion: 'Preparación para la certificación AZ-900 de Microsoft Azure.', docente: 'Lic. Condori', fechaInicio: '15/03/2025', duracion: '2 meses', cupos: 12, precio: 380, categoria: 'Cloud', icono: '☁️', color: 'linear-gradient(135deg,#0ea5e9,#0284c7)', estado: 'proximo' },
-  { id: 5, nombre: 'Machine Learning Aplicado', descripcion: 'Algoritmos de ML con scikit-learn y casos reales del mercado laboral.', docente: 'Lic. Mamani', fechaInicio: '20/03/2025', duracion: '4 meses', cupos: 10, precio: 480, categoria: 'IA', icono: '🤖', color: 'linear-gradient(135deg,#f59e0b,#d97706)', estado: 'disponible' },
-  { id: 6, nombre: 'Excel & Power BI Avanzado', descripcion: 'Análisis de datos empresariales y dashboards profesionales.', docente: 'Lic. Flores', fechaInicio: '01/03/2025', duracion: '2 meses', cupos: 15, precio: 250, categoria: 'Ofimática', icono: '📊', color: 'linear-gradient(135deg,#22c55e,#16a34a)', estado: 'disponible' },
-  { id: 7, nombre: 'Docker & Kubernetes', descripcion: 'Contenedores y orquestación para entornos de producción modernos.', docente: 'Lic. Quispe', fechaInicio: '12/03/2025', duracion: '3 meses', cupos: 7, precio: 420, categoria: 'Desarrollo Web', icono: '🐳', color: 'linear-gradient(135deg,#06b6d4,#0891b2)', estado: 'disponible' },
-  { id: 8, nombre: 'Inteligencia Artificial con Python', descripcion: 'LLMs, IA generativa y automatización con Python y Azure AI.', docente: 'Lic. Mamani', fechaInicio: '25/03/2025', duracion: '4 meses', cupos: 6, precio: 500, categoria: 'IA', icono: '✨', color: 'linear-gradient(135deg,#8b5cf6,#6d28d9)', estado: 'proximo' },
+  { id: 1, nombre: '', 
+  descripcion: 'Aprende Python desde cero enfocado en análisis de datos y visualización.', docente: 'Lic. Mamani', fechaInicio: '01/03/2025', duracion: '3 meses', cupos: 8, precio: 350, categoria: 'Data Science', icono: '🐍', color: 'linear-gradient(135deg,#1d6fc4,#0ea5e9)', estado: 'disponible' },
+
 ])
 
 const cursosFiltrados = computed(() => {
   return cursos.value.filter(c => {
-    const matchBusqueda = c.nombre.toLowerCase().includes(busqueda.value.toLowerCase())
-    const matchCategoria = categoriaActiva.value === 'Todos' || c.categoria === categoriaActiva.value
+    const nombre = (c.nombre || '').toString().toLowerCase()
+    const matchBusqueda = nombre.includes((busqueda.value || '').toLowerCase())
+    const matchCategoria = categoriaActiva.value === 'Todos' || (c.categoria || '') === categoriaActiva.value
     return matchBusqueda && matchCategoria
   })
 })
 
+function mapearCursoFromAPI(curso) {
+  const cupos = (curso.cupo_maximo || 0) - (curso.cupo_usado || 0)
+  const estado = cupos <= 0 ? 'lleno' : curso.estado || 'disponible'
+
+  return {
+    id: curso.id_curso || curso.id,
+    nombre: curso.nombre_curso || curso.nombre,
+    descripcion: curso.descripcion || '',
+    docente: curso.docente?.nombre || 'Docente',
+    fechaInicio: curso.fecha_inicio ? new Date(curso.fecha_inicio).toLocaleDateString('es-BO') : 'Por confirmar',
+    duracion: curso.duracion ? `${curso.duracion} semanas` : 'N/A',
+    cupos: curso.cupos_totales || 0,
+    precio: curso.costo || 0,
+    especialidad: curso.especialidad || 'Otros',
+    estado: estado,
+  }
+}
+
+async function cargarCursos() {
+  loading.value = true
+  errorMsg.value = ''
+  try {
+    const response = await cursoService.listar()
+    const cursosAPI = Array.isArray(response) ? response : response.data || []
+    cursos.value = cursosAPI.map(mapearCursoFromAPI)
+  } catch (error) {
+    console.error('[CursosView] Error al cargar cursos:', error)
+    errorMsg.value = 'No se pudieron cargar los cursos. Intenta más tarde.'
+  } finally {
+    loading.value = false
+  }
+}
+
 function preinscribirse(curso) {
-  if (curso.estado === 'lleno') return
+  if (curso.estado === 'Activo') return
   cursoSeleccionado.value = curso
   modalVisible.value = true
 }
 
 function confirmarPreinscripcion() {
-  // Aquí irá la llamada a Flask
+  // Aquí irá la llamada a Flask para guardar preinscripción
   alert(`✅ Preinscripción enviada para: ${cursoSeleccionado.value.nombre}\n\nRecuerda ir al LASIN a confirmar tu pago.`)
   modalVisible.value = false
 }
 
 function verDetalle(curso) {
-  // Por ahora muestra el modal, luego navegará a una vista de detalle
   preinscribirse(curso)
 }
+
+onMounted(cargarCursos)
 </script>
 
 <style scoped>
@@ -193,22 +292,22 @@ function verDetalle(curso) {
 .dashboard { font-family: 'Sora', sans-serif; display: flex; min-height: 100vh; background: #070f1f; color: #f8faff; }
 
 /* Sidebar igual al dashboard */
-.sidebar { width: 260px; flex-shrink: 0; background: rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.07); display: flex; flex-direction: column; padding: 28px 20px; }
+.sidebar { width: 260px; flex-shrink: 0; background: #0a1628; border-right: 1px solid rgba(0,212,255,0.08); display: flex; flex-direction: column; padding: 28px 20px; }
 .sidebar-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 0 8px; }
-.logo-box { width: 40px; height: 40px; background: linear-gradient(135deg, #1d6fc4, #00d4ff); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; flex-shrink: 0; }
+.logo-box { width: 40px; height: 40px; background: linear-gradient(135deg, #0077b6, #00d4ff); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
 .sidebar-logo strong { display: block; font-size: 15px; font-weight: 700; }
-.sidebar-logo span { font-size: 11px; color: #8a9bb5; }
+.sidebar-logo span { font-size: 11px; color: #7a96b0; }
 .sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-.nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; color: #8a9bb5; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; }
-.nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
-.nav-item.router-link-active { background: rgba(29,111,196,0.2); color: #3b9eff; }
-.sidebar-footer { border-top: 1px solid rgba(255,255,255,0.07); padding-top: 20px; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; color: #7a96b0; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+.nav-item:hover { background: rgba(0,212,255,0.06); color: #f0f8ff; }
+.nav-item.router-link-active { background: rgba(0,119,182,0.2); color: #00d4ff; }
+.sidebar-footer { border-top: 1px solid rgba(0,212,255,0.08); padding-top: 20px; }
 .user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #1d6fc4, #a855f7); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #0077b6, #a855f7); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
 .user-info strong { display: block; font-size: 13px; }
-.user-info span { font-size: 11px; color: #8a9bb5; }
-.btn-logout { width: 100%; display: flex; align-items: center; gap: 8px; padding: 9px 14px; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #8a9bb5; font-family: 'Sora', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
-.btn-logout:hover { border-color: rgba(220,38,38,0.4); color: #fca5a5; }
+.user-info span { font-size: 11px; color: #7a96b0; }
+.btn-logout { width: 100%; display: flex; align-items: center; gap: 8px; padding: 9px 14px; background: transparent; border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; color: #7a96b0; font-family: 'Sora', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.btn-logout:hover { border-color: rgba(239,68,68,0.4); color: #fca5a5; }
 
 /* Main */
 .main { flex: 1; padding: 36px 40px; overflow-y: auto; }
@@ -267,4 +366,46 @@ function verDetalle(curso) {
 .btn-cancelar { flex: 1; padding: 12px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #8a9bb5; font-family: 'Sora', sans-serif; font-size: 14px; cursor: pointer; }
 .btn-confirmar { flex: 1; padding: 12px; background: linear-gradient(135deg, #1d6fc4, #1557a0); border: none; border-radius: 10px; color: white; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
 .btn-confirmar:hover { box-shadow: 0 6px 20px rgba(29,111,196,0.4); }
+.upload-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.upload-box {
+  width: 100%;
+  height: 100px;
+  border: 2px dashed #000000;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: 0.5s;
+  background: #f1f1f1;
+}
+
+.upload-box:hover {
+  border-color: #e5ff00;
+  background: #ffffff;
+}
+
+.upload-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-icon {
+  font-size: 3rem;
+}
+
+.upload-content p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.upload-content small {
+  color: #64748b;
+}
 </style>

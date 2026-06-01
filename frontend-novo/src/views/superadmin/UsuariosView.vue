@@ -33,7 +33,7 @@
           <option value="admin">Solo Administradores</option>
           
         </select>
->>>>>>> 3b05fd2 (gestion de usuarios terminada)
+
         </div>
       </div>
 

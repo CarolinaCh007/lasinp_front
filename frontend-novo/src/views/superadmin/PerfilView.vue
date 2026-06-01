@@ -18,7 +18,7 @@
       <div class="profile-card">
         <div class="profile-banner"></div>
         <div class="profile-avatar-wrap">
-          <div class="profile-avatar">{{ initials }}</div>
+          <div class="profile-avatar">{{ iniciales }}</div>
           <div class="profile-role">Super Admin</div>
         </div>
         <div class="profile-name">
@@ -27,10 +27,7 @@
         </div>
 
         <div class="profile-meta">
-          <div class="meta-item">
-            <span>Usuario</span>
-            <strong>{{ perfil.usuario }}</strong>
-          </div>
+          
           <div class="meta-item">
             <span>Estado</span>
             <strong>{{ perfil.estado }}</strong>
@@ -42,106 +39,166 @@
         </div>
       </div>
 
-      <div class="profile-form-card">
-        <h2>Información personal</h2>
-        <div class="form-grid">
-          <div class="field">
-            <label>Nombre</label>
-            <input v-model="perfil.nombre" :disabled="!editando" type="text" />
-          </div>
-          <div class="field">
-            <label>Apellido paterno</label>
-            <input v-model="perfil.ape_paterno" :disabled="!editando" type="text" />
-          </div>
-          <div class="field">
-            <label>Apellido materno</label>
-            <input v-model="perfil.ape_materno" :disabled="!editando" type="text" />
-          </div>
-          <div class="field">
-            <label>Correo</label>
-            <input v-model="perfil.email" :disabled="!editando" type="email" />
-          </div>
-          <div class="field">
-            <label>Teléfono</label>
-            <input v-model="perfil.telefono" :disabled="!editando" type="tel" />
-          </div>
-          <div class="field full">
-            <label>Dirección</label>
-            <input v-model="perfil.direccion" :disabled="!editando" type="text" />
-          </div>
-          <div class="field">
-            <label>Rol</label>
-            <input :value="perfil.rol" disabled type="text" />
-          </div>
-          <div class="field">
-            <label>Último acceso</label>
-            <input :value="perfil.ultimo_acceso" disabled type="text" />
-          </div>
-        </div>
+      <!-- Formulario de datos -->
+        <div class="card-datos">
+          <h3>Información personal</h3>
 
-        <div class="password-box" v-if="editando">
-          <h3>Cambiar contraseña</h3>
           <div class="form-grid">
             <div class="field">
-              <label>Contraseña actual</label>
-              <input type="password" placeholder="••••••••" />
+              <label>Nombre</label>
+              <input v-model="perfil.nombre" :disabled="!editando" type="text"/>
             </div>
             <div class="field">
-              <label>Nueva contraseña</label>
-              <input type="password" placeholder="••••••••" />
+              <label>Apellido paterno</label>
+              <input v-model="perfil.ape_paterno" :disabled="!editando" type="text"/>
+            </div>
+            <div class="field">
+              <label>Apellido materno</label>
+              <input v-model="perfil.ape_materno" :disabled="!editando" type="text"/>
+            </div>
+            <div class="field">
+              <label>Correo institucional</label>
+              <input v-model="perfil.correo_electronico" disabled type="email"/>
+            </div>
+            <div class="field">
+              <label>Teléfono</label>
+              <input v-model="perfil.telefono" :disabled="!editando" type="tel"/>
+            </div>
+            <div class="field full">
+              <label>Dirección</label>
+              <input v-model="perfil.direccion" :disabled="!editando" type="text"/>
+            </div>
+            <div class="field">
+              <label>Carnet de identidad</label>
+              <input v-model="perfil.ci" :disabled="!editando" type="text"/>
+            </div>
+            <div class="field">
+              <label>Fecha de nacimiento</label>
+              <input v-model="perfil.fecha_nacimiento" :disabled="!editando" type="date"/>
             </div>
           </div>
-        </div>
 
-        <div class="alert success" v-if="guardado">
-          ✅ Perfil guardado correctamente. Cuando tengas el endpoint, aquí llamarás a la API.
+          <!-- Cambiar contraseña -->
+          <div class="password-section" v-if="editando">
+            <h3>Cambiar contraseña</h3>
+            <div class="form-grid">
+              <div class="field">
+                <label>Contraseña actual</label>
+                <input type="password" placeholder="••••••••"/>
+              </div>
+              <div class="field">
+                <label>Nueva contraseña</label>
+                <input type="password" placeholder="••••••••"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="success-msg" v-if="guardado">
+            ✅ Perfil actualizado correctamente.
+          </div>
+          <div class="error-msg" v-if="errorMsg">
+            ⚠️ {{ errorMsg }}
+          </div>
         </div>
-      </div>
+      
     </div>
   </SuperadminLayout>
->>>>>>> 3b05fd2 (gestion de usuarios terminada)
+
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-
+import { authService } from '../../services/auth'
 import SuperadminLayout from '../../components/SuperadminLayout.vue'
-
+import usuariosService from '../../services/usuarios'
 
 const editando = ref(false)
 const guardado = ref(false)
+const errorMsg = ref('')
+const loading = ref(true)
 
 const perfil = ref({
-  nombre: 'Rosa',
-  ape_paterno: 'Gonzales',
-  ape_materno: 'Lopez',
-  email: 'superadmin@lasin.com',
-  telefono: '+591 70000000',
-  direccion: 'Av. Ecuador 1234, La Paz',
-  usuario: 'superadmin',
-  rol: 'superadmin',
-  estado: 'activo',
-  fecha_registro: '2026-05-12',
-  ultimo_acceso: '2026-05-13 10:45',
+  id_usuario: null,
+  nombre: '',
+  ape_paterno: '',
+  ape_materno: '',
+  correo_electronico: '',
+  telefono: '',
+  direccion: '',
+  ci: '',
+  fecha_nacimiento: '',
 })
 
-
-const initials = computed(() => {
+const nombreCompleto = computed(() => {
   const parts = [perfil.value.nombre, perfil.value.ape_paterno, perfil.value.ape_materno].filter(Boolean)
-  return parts.map(part => part[0]?.toUpperCase()).join('').slice(0, 2)
+  return parts.length ? parts.join(' ') : 'Estudiante'
 })
 
+const iniciales = computed(() => {
+  const parts = [perfil.value.nombre, perfil.value.ape_paterno, perfil.value.ape_materno]
+    .filter(Boolean)
+    .map(part => part.trim().charAt(0).toUpperCase())
+  return parts.slice(0, 2).join('') || 'ES'
+})
+function setPerfilFromUsuario(usuario) {
+  perfil.value.id_usuario = usuario?.id_usuario ?? usuario?.id ?? null
+  perfil.value.nombre = usuario?.nombre || ''
+  perfil.value.ape_paterno = usuario?.ape_paterno || ''
+  perfil.value.ape_materno = usuario?.ape_materno || ''
+  perfil.value.correo_electronico = usuario?.correo_electronico || usuario?.email || ''
+  perfil.value.telefono = usuario?.celular || usuario?.telefono || ''
+  perfil.value.direccion = usuario?.direccion || ''
+  perfil.value.ci = usuario?.ci || ''
+  perfil.value.fecha_nacimiento = usuario?.fecha_nacimiento || ''
+}
+async function cargarPerfil() {
+  const usuarioLocal = authService.getUsuario()
+  if (usuarioLocal) {
+    setPerfilFromUsuario(usuarioLocal)
+  }
 
-function guardarCambios() {
-  // TODO: aquí llamas a tu endpoint de perfil de superadmin.
-  editando.value = false
-  guardado.value = true
-  setTimeout(() => { guardado.value = false }, 3000)
+  try {
+    const usuario = await authService.refreshUsuario()
+    setPerfilFromUsuario(usuario)
+  } catch (error) {
+    console.warn('[PerfilEstudiante] No se pudo refrescar el usuario', error)
+  } finally {
+    loading.value = false
+  }
 }
 
-onMounted(() => {
-  // TODO: cuando el endpoint esté listo, carga aquí los datos reales.
-})
+async function guardarCambios() {
+  errorMsg.value = ''
+  guardado.value = false
+
+  if (!perfil.value.id_usuario) {
+    errorMsg.value = 'No se pudo identificar al usuario.'
+    return
+  }
+
+  const datos = {
+    nombre: perfil.value.nombre,
+    ape_paterno: perfil.value.ape_paterno,
+    ape_materno: perfil.value.ape_materno,
+    telefono: perfil.value.telefono,
+    direccion: perfil.value.direccion,
+    semestre: perfil.value.semestre,
+    fecha_nacimiento: perfil.value.fecha_nacimiento,
+  }
+
+  try {
+    await usuariosService.actualizarUsuario(perfil.value.id_usuario, datos)
+    editando.value = false
+    guardado.value = true
+    await authService.refreshUsuario()
+    setPerfilFromUsuario(authService.getUsuario())
+    setTimeout(() => (guardado.value = false), 3000)
+  } catch (error) {
+    console.error('[PerfilEstudiante] Error al guardar perfil:', error)
+    errorMsg.value = error.response?.data?.detail || 'No se pudo guardar el perfil. Revisa tu conexión.'
+  }
+}
+onMounted(cargarPerfil)
 </script>
 
 <style scoped>

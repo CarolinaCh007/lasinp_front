@@ -28,13 +28,17 @@
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           Historial y Notas
         </router-link>
+        <router-link to="/estudiante/mis-cursos" class="nav-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
+          Mis Cursos
+        </router-link>
       </nav>
 
       <div class="sidebar-footer">
         <div class="user-info">
-          <div class="user-avatar">CA</div>
+          <div class="user-avatar">{{ usuario?.nombre?.charAt(0).toUpperCase() || 'E' }}</div>
           <div>
-            <strong>Carolina Ch.</strong>
+            <strong>{{ usuario?.nombre || 'Estudiante' }}</strong>
             <span>Estudiante</span>
           </div>
         </div>
@@ -51,7 +55,7 @@
       <!-- Header -->
       <div class="top-bar">
         <div>
-          <h1>¡Hola, Carolina! 👋</h1>
+          <h1>¡Hola, {{ usuario?.nombre || 'Estudiante' }}! 👋</h1>
           <p>Aquí tienes el resumen de tu actividad académica en el LASIN.</p>
         </div>
         <div class="top-date">{{ fechaHoy }}</div>
@@ -161,8 +165,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { authService } from '../../services/auth'
+import cursoService from '../../services/cursoService'
 
 const router = useRouter()
 
@@ -174,17 +180,67 @@ const fechaHoy = computed(() => {
   })
 })
 
-// Datos de ejemplo — luego vienen de Flask
-const cursosActivos = ref([
-  { id: 1, nombre: 'Python para Data Science', docente: 'Lic. Mamani', progreso: 65, color: '#3b9eff' },
-  { id: 2, nombre: 'React / Angular Avanzado', docente: 'Lic. Quispe', progreso: 40, color: '#a855f7' },
-])
+const loading = ref(true)
+const cursosActivos = ref([])
+const recomendaciones = ref([])
+const usuario = ref(null)
 
-const recomendaciones = ref([
-  { id: 1, nombre: 'Machine Learning Aplicado', motivo: 'Basado en tu curso de Python', icono: '🤖', color: 'rgba(59,158,255,0.15)' },
-  { id: 2, nombre: 'Docker & DevOps', motivo: 'Popular en tu carrera', icono: '🐳', color: 'rgba(168,85,247,0.15)' },
-  { id: 3, nombre: 'SQL + BigQuery', motivo: 'Complementa Data Science', icono: '🗄️', color: 'rgba(34,197,94,0.15)' },
-])
+const coloresMap = {
+  'Desarrollo Web': '#a855f7',
+  'Data Science': '#3b9eff',
+  'Ciberseguridad': '#ef4444',
+  'Cloud': '#0ea5e9',
+  'IA': '#f59e0b',
+  'Ofimática': '#22c55e',
+}
+
+const iconosMap = {
+  'Desarrollo Web': '⚛️',
+  'Data Science': '🐍',
+  'Ciberseguridad': '🔐',
+  'Cloud': '☁️',
+  'IA': '🤖',
+  'Ofimática': '📊',
+}
+
+async function cargarDatos() {
+  loading.value = true
+  try {
+    usuario.value = authService.getUsuario()
+    
+    // Cargar todos los cursos disponibles
+    const response = await cursoService.listar()
+    const cursosAPI = Array.isArray(response) ? response : response.data || []
+    
+    // Por ahora mostramos los primeros 2-3 cursos como "activos"
+    // En el backend podrías devolver una lista de cursos del estudiante
+    cursosActivos.value = cursosAPI.slice(0, 2).map(curso => ({
+      id: curso.id_curso || curso.id,
+      nombre: curso.nombre_curso || curso.nombre,
+      docente: curso.docente?.nombre || 'Docente',
+      progreso: Math.floor(Math.random() * 80) + 10, // Progreso aleatorio hasta implementar
+      color: coloresMap[curso.categoria] || '#3b9eff',
+    }))
+    
+    // Generar recomendaciones basadas en cursos disponibles
+    recomendaciones.value = cursosAPI.slice(2, 5).map(curso => ({
+      id: curso.id_curso || curso.id,
+      nombre: curso.nombre_curso || curso.nombre,
+      motivo: `${curso.categoria} • Bs. ${curso.precio}`,
+      icono: iconosMap[curso.categoria] || '📚',
+      color: `rgba(${hexToRgb(coloresMap[curso.categoria] || '#3b9eff')}, 0.15)`,
+    }))
+  } catch (error) {
+    console.error('[DashboardView] Error al cargar datos:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  return result ? `${parseInt(result[1], 16)},${parseInt(result[2], 16)},${parseInt(result[3], 16)}` : '59,158,255'
+}
 
 const notificaciones = ref([
   { id: 1, tipo: 'info', titulo: 'Examen próximo', descripcion: 'Python Data Science — Parcial el viernes 21/02', tiempo: 'Hace 1h' },
@@ -195,6 +251,8 @@ const notificaciones = ref([
 function cerrarSesion() {
   router.push('/login')
 }
+
+onMounted(cargarDatos)
 </script>
 
 <style scoped>
@@ -209,13 +267,23 @@ function cerrarSesion() {
 }
 
 /* ── Sidebar ── */
-.sidebar {
-  width: 260px; flex-shrink: 0;
-  background: rgba(255,255,255,0.03);
-  border-right: 1px solid rgba(255,255,255,0.07);
-  display: flex; flex-direction: column;
-  padding: 28px 20px;
-}
+.sidebar { width: 260px; flex-shrink: 0; background: #0a1628; border-right: 1px solid rgba(0,212,255,0.08); display: flex; flex-direction: column; padding: 28px 20px; }
+.sidebar-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 0 8px; }
+.logo-box { width: 40px; height: 40px; background: linear-gradient(135deg, #0077b6, #00d4ff); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
+.sidebar-logo strong { display: block; font-size: 15px; font-weight: 700; }
+.sidebar-logo span { font-size: 11px; color: #7a96b0; }
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; color: #7a96b0; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+.nav-item:hover { background: rgba(0,212,255,0.06); color: #f0f8ff; }
+.nav-item.router-link-active { background: rgba(0,119,182,0.2); color: #00d4ff; }
+.sidebar-footer { border-top: 1px solid rgba(0,212,255,0.08); padding-top: 20px; }
+.user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #0077b6, #a855f7); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.user-info strong { display: block; font-size: 13px; }
+.user-info span { font-size: 11px; color: #7a96b0; }
+.btn-logout { width: 100%; display: flex; align-items: center; gap: 8px; padding: 9px 14px; background: transparent; border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; color: #7a96b0; font-family: 'Sora', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.btn-logout:hover { border-color: rgba(239,68,68,0.4); color: #fca5a5; }
+
 .sidebar-logo {
   display: flex; align-items: center; gap: 12px;
   margin-bottom: 40px; padding: 0 8px;

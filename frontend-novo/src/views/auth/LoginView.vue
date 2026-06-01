@@ -13,7 +13,7 @@
             </svg>
           </div>
           <div>
-            <strong class="hero-logo__title">LASIN 2.0</strong>
+            <strong class="hero-logo__title">LASIN 2.01111</strong>
             <span class="hero-logo__sub">Laboratorio Superior de Informática</span>
           </div>
         </div>
@@ -132,7 +132,7 @@
 
 <script setup>
 // ─── Imports ────────────────────────────────────────────────
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { authService } from '../../services/auth'
@@ -143,19 +143,12 @@ const router = useRouter()
 // ─── Estado ─────────────────────────────────────────────────
 const email            = ref('')
 const password         = ref('')
-const rolSeleccionado  = ref('estudiante')
+// no role selection at login; backend decides user role
 const cargando         = ref(false)
 const errorMsg         = ref('')
 const mostrarPassword  = ref(false)
 
 // ─── Constantes ─────────────────────────────────────────────
-const roles = [
-  { value: 'estudiante', label: 'Estudiante',    icono: '🎓' },
-  { value: 'docente',    label: 'Docente',        icono: '👨‍🏫' },
-  { value: 'admin',      label: 'Administrador',  icono: '🗂️' },
-  { value: 'superadmin', label: 'Super Admin',    icono: '⚙️' },
-]
-
 // Rutas por rol — en el futuro esto vendrá del backend (JWT payload)
 const rutasPorRol = {
   estudiante: '/estudiante/dashboard',
@@ -163,17 +156,6 @@ const rutasPorRol = {
   admin:      '/admin/dashboard',
   superadmin: '/superadmin/dashboard',
 }
-
-// Placeholder dinámico según rol seleccionado
-const placeholderEmail = computed(() => {
-  const map = {
-    estudiante: 'usuario@est.umsa.bo',
-    docente:    'docente@fcpn.umsa.bo',
-    admin:      'admin@lasin.umsa.bo',
-    superadmin: 'superadmin@lasin.umsa.bo',
-  }
-  return map[rolSeleccionado.value]
-})
 
 // ─── Métodos ─────────────────────────────────────────────────
 
@@ -217,11 +199,10 @@ async function ingresar() {
   try {
     const result = await authService.login(
       email.value,
-      password.value,
-      rolSeleccionado.value 
+      password.value
     )
 
-    console.log('✅ Login exitoso:', {
+    console.log('✅ Login exitoso:', {  
       nombre: result.usuario.nombre,
       rol: result.rol,
       mensaje: result.mensaje
