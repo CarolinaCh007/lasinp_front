@@ -41,7 +41,7 @@
 
         <div class="form-head">
           <h2>Iniciar sesión</h2>
-          <p class="text-muted">Selecciona tu rol y accede al sistema</p>
+
         </div>
 
         <!-- Selector de rol -->
@@ -76,7 +76,7 @@
               placeholder="••••••••" @keyup.enter="ingresar" />
           </div>
           <button class="btn-toggle-pass" @click="mostrarPassword = !mostrarPassword">
-            {{ mostrarPassword ? '🙈 Ocultar' : '👁️ Mostrar' }}
+            {{ mostrarPassword ? ' Ocultar' : ' Mostrar' }}
           </button>
         </div>
 

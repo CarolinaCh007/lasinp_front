@@ -41,16 +41,18 @@
         <h1>
           Domina la <span class="highlight">informática</span> del futuro
         </h1>
+        <br>
         <p>
           Cursos online y presenciales diseñados por expertos. Desde programación avanzada hasta inteligencia artificial, te llevamos al siguiente nivel con metodología práctica y certificación internacional.
         </p>
+          <br>  
         <div class="hero-buttons">
-          <a href="#cursos" class="btn btn-primary">📚 Ver Cursos</a>
-          <a href="#contacto" class="btn btn-outline">🎓 Solicitar Información</a>
+          <a href="#cursos" class="btn btn-primary"> Ver Cursos</a>
+          <a href="#contacto" class="btn btn-outline"> Solicitar Información</a>
         </div>
       </div>
       <div class="hero-visual">
-  <img src="@/assets/lasin12.jpg" alt="Laboratorio">
+  <img src="@/assets/fotosala.png" alt="Laboratorio">
 </div>
     </div>
   </section>
@@ -414,12 +416,16 @@ async function cargarCursos() {
   } finally {
     loading.value = false
   }
+  
 }
+onMounted(() => {
+  cargarCursos()
+})
 function verDetalle(curso) {
   preinscribirse(curso)
 }
 function preinscribirse(curso) {
-  if (curso.estado === 'Activo') return
+  if (curso.estado === 'activo') return
   cursoSeleccionado.value = curso
 }
 
@@ -639,71 +645,143 @@ onUnmounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(6px);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 2000;
-  padding: 2rem;
+  align-items: center;
+  z-index: 9999;
+  padding: 20px;
 }
 
 .modal-content {
-  background: #848383;
-  border-radius: var(--radius-xl);
-  max-width: 700px;
   width: 100%;
-  max-height: 85vh;
+  max-width: 900px;
+  max-height: 95vh;
   overflow-y: auto;
-  padding: 2.5rem;
+  background: var(--white);
+  border-radius: 14px;
+  border: 1px solid var(--border-soft);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  padding: 30px;
   position: relative;
-  box-shadow: var(--shadow-lg);
-  animation: modalIn 0.3s ease-out;
 }
 
-@keyframes modalIn {
-  from { opacity: 0; transform: translateY(20px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
+/* BOTÓN CERRAR */
 .modal-close {
   position: absolute;
-  top: 1.2rem;
-  right: 1.5rem;
-  background: none;
+  top: 15px;
+  right: 18px;
+  font-size: 26px;
+  background: transparent;
   border: none;
-  font-size: 2rem;
+  color: var(--text-muted);
   cursor: pointer;
-  color: var(--gray-600);
-  transition: color var(--transition);
-  line-height: 1;
 }
 
 .modal-close:hover {
-  color: var(--primary);
+  color: var(--color-cyan);
 }
 
+/* HEADER */
 .modal-header {
-  margin-bottom: 1.8rem;
+  margin-bottom: 20px;
 }
 
 .modal-header h2 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.8rem;
-  margin: 0.5rem 0 0.2rem;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
 }
 
 .modal-sigla {
-  color: var(--gray-600);
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-muted);
 }
 
+/* TAGS */
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.tag-online {
+  background: rgba(0, 212, 255, 0.15);
+  color: var(--color-cyan);
+}
+
+.tag-offline {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+}
+
+/* GRID */
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.8rem;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.detail-item {
+  background: rgb(255, 255, 255);
+  border: 1px solid var(--border-soft);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.detail-label {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.detail-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ESTADO */
+.estado-activo {
+  color: #3a9a5d;
+}
+
+/* DESCRIPCIÓN */
+.modal-description {
+  margin-bottom: 25px;
+}
+
+.modal-description h4 {
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.modal-description p {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* BOTONES */
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  color: var(--text-primary);
+}
+
+.btn-outline:hover {
+  border-color: var(--color-cyan);
+  color: var(--color-cyan);
 }
 
 .detail-item {
@@ -711,7 +789,20 @@ onUnmounted(() => {
   padding: 0.8rem;
   border-radius: var(--radius-sm);
 }
+.modal-enter-active,
+.modal-leave-active {
+  transition: all 0.25s ease;
+}
 
+.modal-enter-from {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
 .detail-label {
   display: block;
   font-size: 0.75rem;
@@ -999,9 +1090,9 @@ body {
   position: relative;
   min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 7rem 2rem 5rem;
+  align-items: right;
+  justify-content: right;
+  padding: 7rem 5rem 9rem;
   overflow: hidden;
   background: linear-gradient(170deg, #f8faff 0%, #eef2ff 30%, #f7f8fc 70%, #ffffff 100%);
   
@@ -1046,7 +1137,7 @@ body {
 .hero-content {
   position: relative;
   z-index: 2;
-  max-width: 1300px;
+  max-width: 1400px;
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1176,8 +1267,8 @@ body {
   position: relative;
   animation: fadeInUp 0.9s ease-out 0.2s both;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: right;
+  justify-content: right;
   min-height: 420px;
 }
 
@@ -1500,7 +1591,7 @@ body {
   position: absolute;
   top: 0;
   right: 0;
-  width: 55%;
+  width: 60%;
   height: 100vh;
   overflow: hidden;
 }
@@ -1508,7 +1599,7 @@ body {
 /* IMAGEN */
 .hero-visual img {
   width: 100%;
-  height: 100%;
+  height: 90%;
   object-fit: cover;
 
   mask-image: linear-gradient(
@@ -1682,6 +1773,7 @@ body {
   color: #7a7f99;
 }
 
+
 /* ============ RESPONSIVE ============ */
 @media (max-width: 968px) {
   .hero-content {
@@ -1770,5 +1862,13 @@ body {
   .floating-card.card3 {
     display: none;
   }
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999; /* 🔥 clave */
 }
 </style>

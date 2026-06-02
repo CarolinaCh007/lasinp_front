@@ -63,7 +63,7 @@
           <tr>
             <th>Curso</th>
             <th>Sigla</th>
-            <th>Nivel</th>
+            <th>Niveles</th>
             <th>Costo</th>
             <th>Cupos</th>
             <th>Fechas</th>

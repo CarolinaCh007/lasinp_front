@@ -18,6 +18,49 @@ export const usuariosService = {
     })
     return response.data
   },
+  crearAdmin(datos) {
+    return api.post('/auth/users/admin', datos)
+  },
+
+  crearTeacher(datos) {
+    return api.post('/auth/users/teacher', datos)
+  },
+
+  crearEstudiante(datos) {
+    return api.post('/auth/register/student', datos)
+  },
+
+  // ────────────────────────────────────────────────────────────────
+  // FLUJO DE REGISTRO EN DOS PASOS PARA DOCENTE (desde Superadmin)
+  // ────────────────────────────────────────────────────────────────
+
+  /**
+   * Paso 1 del registro de docente: envía email con token
+   * @param {string} nombre 
+   * @param {string} ape_paterno 
+   * @param {string} ape_materno 
+   * @param {string} correo_electronico 
+   * @returns {Promise<Object>} { mensaje, correo_electronico }
+   */
+  async preRegistroDocente(nombre, ape_paterno, ape_materno, correo_electronico) {
+    const response = await api.post('/auth/register-teacher/step1', {
+      nombre,
+      ape_paterno,
+      ape_materno,
+      correo_electronico
+    })
+    return response.data
+  },
+
+  /**
+   * Paso 2 del registro de docente: completar datos con token del email
+   * @param {Object} datos - { token, ci, password, confirmar_password, celular, fecha_nacimiento, especialidad, grado_academico, anios_experiencia }
+   * @returns {Promise<Object>} Datos del usuario creado
+   */
+  async completarRegistroDocente(datos) {
+    const response = await api.post('/auth/register-teacher/step2', datos)
+    return response.data
+  },
 
   /**
    * Obtener detalles de un usuario por ID

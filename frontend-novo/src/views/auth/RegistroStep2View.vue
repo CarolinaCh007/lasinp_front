@@ -94,6 +94,24 @@
           />
         </div>
 
+        <!-- Institución -->
+        <div class="institution-note">
+          <p>¡El LASIN es para todos! No necesitas ser estudiante de la universidad para ingresar tu institución.</p>
+        </div>
+        <div class="form-group">
+          <label for="institucion" class="form-label">Institución de Procedencia *</label>
+          <input
+            id="institucion"
+            v-model="formData.institucion"
+            type="text"
+            class="form-input"
+            placeholder="Ej: Universidad Mayor de San Andrés"
+            maxlength="255"
+            required
+          />
+          <span v-if="errors.institucion" class="error-message">{{ errors.institucion }}</span>
+        </div>
+
         <!-- Sexo -->
         <div class="form-group">
           <label for="sexo" class="form-label">Sexo</label>
@@ -157,7 +175,8 @@ export default {
         celular: '',
         fecha_nacimiento: '',
         direccion: '',
-        sexo: ''
+        sexo: '',
+        institucion: ''
       },
       errors: {},
       errorGeneral: '',
@@ -204,6 +223,11 @@ export default {
         this.errors.confirmar_password = 'Las contraseñas no coinciden'
       }
 
+      // Validar institución
+      if (!this.formData.institucion.trim()) {
+        this.errors.institucion = 'La institución es requerida'
+      }
+
       return Object.keys(this.errors).length === 0
     },
 
@@ -225,7 +249,8 @@ export default {
           this.formData.celular,
           this.formData.fecha_nacimiento,
           this.formData.direccion,
-          this.formData.sexo
+          this.formData.sexo,
+          this.formData.institucion
         )
 
         this.successMessage = '✅ ¡Registro completado exitosamente! Redirigiendo...'
@@ -233,7 +258,7 @@ export default {
         // Redirigir después de 2 segundos
         setTimeout(() => {
           this.$router.push('/login')
-        }, 2000)
+        }, 3000)
       } catch (error) {
         this.errorGeneral = error.response?.data?.detail || 'Error al completar el registro. Intenta nuevamente.'
         console.error('Error en Paso 2:', error)
@@ -251,90 +276,109 @@ export default {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: #010730;
+  background: var(--color-bg);
   padding: 20px;
+  font-family: var(--font-main);
 }
 
 .registro-card {
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
   padding: 40px;
   max-width: 500px;
   width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
 }
 
 .registro-title {
-  font-size: 28px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 5px;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 6px;
   text-align: center;
 }
 
 .registro-subtitle {
-  font-size: 14px;
-  color: #666;
+  font-size: 13px;
+  color: var(--text-muted);
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .form-label {
   display: block;
   font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
-  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  font-size: 13px;
 }
 
 .form-input {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
   font-size: 14px;
-  transition: border-color 0.3s;
-  font-family: inherit;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  transition: var(--transition-normal);
+  font-family: var(--font-main);
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--color-cyan);
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.15);
 }
 
 textarea.form-input {
   resize: vertical;
 }
 
+.institution-note {
+  padding: 12px 14px;
+  background: rgba(0, 159, 255, 0.08);
+  border: 1px solid rgba(0, 159, 255, 0.16);
+  border-radius: 10px;
+  margin-bottom: 14px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.institution-note p {
+  margin: 0;
+  line-height: 1.45;
+}
+
 .error-message {
   display: block;
-  color: #e74c3c;
+  color: #f87171;
   font-size: 12px;
   margin-top: 5px;
 }
 
 .alert {
-  padding: 12px;
-  border-radius: 5px;
+  padding: 12px 14px;
+  border-radius: 8px;
   margin-bottom: 20px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .alert-error {
-  background-color: #ffe6e6;
-  color: #c0392b;
-  border: 1px solid #e74c3c;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
 }
 
 .alert-success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #28a745;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
 }
 
 .form-actions {
@@ -345,25 +389,24 @@ textarea.form-input {
 }
 
 .btn {
-  padding: 12px 20px;
+  padding: 12px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s;
-  text-decoration: none;
+  transition: var(--transition-normal);
   text-align: center;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--color-cyan);
+  color: #000;
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
 }
 
 .btn-primary:disabled {
@@ -373,31 +416,31 @@ textarea.form-input {
 
 .btn-link {
   background: transparent;
-  color: #667eea;
-  text-decoration: none;
-  border: 1px solid #667eea;
+  color: var(--color-cyan);
+  border: 1px solid var(--border-soft);
 }
 
 .btn-link:hover {
-  background: #f0f5ff;
+  background: rgba(0, 212, 255, 0.08);
+  border-color: var(--color-cyan);
 }
 
 .info-box {
-  background: #f8f9fa;
-  border-left: 4px solid #667eea;
-  padding: 15px;
-  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid var(--color-cyan);
+  padding: 14px;
+  border-radius: 6px;
   margin-top: 20px;
 }
 
 .info-box ul {
-  margin: 10px 0 0 20px;
-  font-size: 13px;
-  color: #555;
+  margin: 10px 0 0 18px;
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 .info-box li {
-  margin: 5px 0;
+  margin: 4px 0;
 }
 
 .mt-10 {
@@ -410,11 +453,10 @@ textarea.form-input {
   }
 
   .registro-title {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .btn {
-    padding: 10px 15px;
     font-size: 13px;
   }
 }

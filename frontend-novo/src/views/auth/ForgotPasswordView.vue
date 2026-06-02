@@ -107,90 +107,95 @@ export default {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--color-bg);
   padding: 20px;
+  font-family: var(--font-main);
 }
 
 .forgot-card {
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
   padding: 40px;
-  max-width: 400px;
+  max-width: 420px;
   width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
 }
 
 .forgot-title {
-  font-size: 28px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 5px;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 6px;
   text-align: center;
 }
 
 .forgot-subtitle {
-  font-size: 14px;
-  color: #666;
+  font-size: 13px;
+  color: var(--text-muted);
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .form-label {
   display: block;
   font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
-  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  font-size: 13px;
 }
 
 .form-input {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
   font-size: 14px;
-  transition: border-color 0.3s;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  transition: var(--transition-normal);
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--color-cyan);
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.15);
 }
 
 .error-message {
   display: block;
-  color: #e74c3c;
+  color: #f87171;
   font-size: 12px;
   margin-top: 5px;
 }
 
 .alert {
-  padding: 12px;
-  border-radius: 5px;
+  padding: 12px 14px;
+  border-radius: 8px;
   margin-bottom: 20px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .alert-error {
-  background-color: #ffe6e6;
-  color: #c0392b;
-  border: 1px solid #e74c3c;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
 }
 
 .alert-success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #28a745;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
 }
 
 .text-small {
   font-size: 12px;
   margin-top: 8px;
+  color: var(--text-muted);
 }
 
 .form-actions {
@@ -201,25 +206,24 @@ export default {
 }
 
 .btn {
-  padding: 12px 20px;
-  border: none;
-  border-radius: 5px;
+  padding: 12px;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s;
-  text-decoration: none;
+  transition: var(--transition-normal);
   text-align: center;
+  border: none;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--color-cyan);
+  color: #000;
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
 }
 
 .btn-primary:disabled {
@@ -229,27 +233,27 @@ export default {
 
 .btn-link {
   background: transparent;
-  color: #667eea;
-  text-decoration: none;
-  border: 1px solid #667eea;
+  color: var(--color-cyan);
+  border: 1px solid var(--border-soft);
 }
 
 .btn-link:hover {
-  background: #f0f5ff;
+  background: rgba(0, 212, 255, 0.08);
+  border-color: var(--color-cyan);
 }
 
 .info-box {
-  background: #f8f9fa;
-  border-left: 4px solid #667eea;
-  padding: 15px;
-  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid var(--color-cyan);
+  padding: 14px;
+  border-radius: 6px;
   margin-top: 20px;
 }
 
 .info-box p {
-  margin: 8px 0;
-  font-size: 13px;
-  color: #555;
+  margin: 6px 0;
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 @media (max-width: 480px) {
@@ -258,11 +262,10 @@ export default {
   }
 
   .forgot-title {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .btn {
-    padding: 10px 15px;
     font-size: 13px;
   }
 }

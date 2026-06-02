@@ -11,6 +11,7 @@ const router = createRouter({
     { path: '/login',     name: 'login',     component: LoginView },
     { path: '/registro-step1', name: 'registro-step1', component: () => import('../views/auth/RegistroStep1View.vue')},
     { path: '/registro-step2',name: 'registro-step2',component: () => import('../views/auth/RegistroStep2View.vue')},
+    { path: '/completar-registro-docente', name: 'completar-registro-docente', component: () => import('../views/auth/CompletarRegistroDocenteView.vue')},
     { path: '/verify-email', name: 'verify-email',component: () => import('../views/auth/RegistroStep2View.vue')},
     { path: '/forgot-password',name: 'forgot-password',component: () => import('../views/auth/ForgotPasswordView.vue')},
     { path: '/reset-password', name: 'reset-password', component: () => import('../views/auth/ResetPasswordView.vue') },

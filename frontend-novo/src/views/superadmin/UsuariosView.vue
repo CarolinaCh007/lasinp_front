@@ -7,32 +7,27 @@
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="input-base"
-            placeholder="Buscar por nombre, CI o correo..."
-          />
-           
+          <input v-model="searchQuery" type="text" class="input-base" placeholder="Buscar por nombre, CI o correo..." />
+
         </div>
-        <div class="search-box">  
-        <select v-model="filterEstado" class="select-base">
-          <option value="">Todos los estados</option>
-          <option value="activo">Solo Activos</option>
-          <option value="pendiente">Solo Pendientes</option>
-          <option value="bloqueado">Solo Bloqueados</option>
-          
-        </select>
+        <div class="search-box">
+          <select v-model="filterEstado" class="select-base">
+            <option value="">Todos los estados</option>
+            <option value="activo">Solo Activos</option>
+            <option value="pendiente">Solo Pendientes</option>
+            <option value="bloqueado">Solo Bloqueados</option>
+
+          </select>
         </div>
 
-        <div class="search-box">  
-        <select v-model="filterRol" class="select-base">
-          <option value="">Todos los roles</option>
-          <option value="estudiante">Solo Estudiantes</option>
-          <option value="docente">Solo Docentes</option>
-          <option value="admin">Solo Administradores</option>
-          
-        </select>
+        <div class="search-box">
+          <select v-model="filterRol" class="select-base">
+            <option value="">Todos los roles</option>
+            <option value="estudiante">Solo Estudiantes</option>
+            <option value="docente">Solo Docentes</option>
+            <option value="admin">Solo Administradores</option>
+
+          </select>
 
         </div>
       </div>
@@ -65,9 +60,10 @@
           <tr v-if="!loading && errorMessage">
             <td colspan="6" class="empty-message text-danger">⚠️ {{ errorMessage }}</td>
           </tr>
-          <tr v-for="usuario in filteredUsuarios" :key="usuario.id_usuario">
+          <tr v-for="usuario in pagedUsuarios" :key="usuario.id_usuario">
             <td>
-              <strong>{{ `${usuario.nombre || ''} ${usuario.ape_paterno || ''} ${usuario.ape_materno || ''}`.trim() }}</strong>
+              <strong>{{ `${usuario.nombre || ''} ${usuario.ape_paterno || ''} ${usuario.ape_materno || ''}`.trim()
+                }}</strong>
             </td>
             <td>{{ usuario.ci || '-' }}</td>
             <td>{{ usuario.correo_electronico || '-' }}</td>
@@ -86,47 +82,41 @@
             </td>
             <td class="actions-cell">
               <!-- BOTÓN MÁS DETALLES -->
-              <button 
-                class="btn btn-primary"
-                title="Ver detalles"
-                @click="openDetailsModal(usuario)"
-              >
+              <button class="btn btn-primary" title="Ver detalles" @click="openDetailsModal(usuario)">
                 Más detalles
               </button>
 
               <!-- BOTÓN EDITAR -->
-              <button 
-                class="btn btn-success"
-                title="Editar usuario"
-                @click="openEditModal(usuario)"
-              >
+              <button class="btn btn-success" title="Editar usuario" @click="openEditModal(usuario)">
                 Editar
               </button>
 
-              <button 
-                v-if="usuario.estado === 'activo'"
-                class="btn btn-danger"
-                title="Bloquear"
-                @click="cambiarEstadoUsuario(usuario.id_usuario, 'inactivo')"
-              >
+              <button v-if="usuario.estado === 'activo'" class="btn btn-danger" title="Bloquear"
+                @click="cambiarEstadoUsuario(usuario.id_usuario, 'inactivo')">
                 BLOQUEAR
               </button>
 
-              <button 
-                v-if="usuario.estado !== 'activo'"
-                class="btn btn-success" 
-                title="Activar"
-                @click="cambiarEstadoUsuario(usuario.id_usuario, 'activo')"
-              >
+              <button v-if="usuario.estado !== 'activo'" class="btn btn-success" title="Activar"
+                @click="cambiarEstadoUsuario(usuario.id_usuario, 'activo')">
                 ACTIVAR
               </button>
             </td>
           </tr>
-          <tr v-if="!loading && filteredUsuarios.length === 0 && !errorMessage">
+          <tr v-if="!loading && pagedUsuarios.length === 0 && !errorMessage">
             <td colspan="6" class="empty-message">No se encontraron usuarios con esos filtros.</td>
           </tr>
         </tbody>
       </table>
+    </div>
+    <div class="pagination-controls">
+      <div class="pagination-info">
+        Mostrando {{ pagedUsuarios.length }} de {{ filteredAndSortedUsuarios.length }} usuarios
+      </div>
+      <div class="pagination-actions">
+        <button class="btn-secondary" :disabled="currentPage === 1" @click="currentPage--">Anterior</button>
+        <span class="pagination-page">Página {{ currentPage }} de {{ totalPages }}</span>
+        <button class="btn-secondary" :disabled="currentPage === totalPages" @click="currentPage++">Siguiente</button>
+      </div>
     </div>
 
     <!-- Modal de Detalles del Usuario -->
@@ -143,7 +133,8 @@
             </div>
             <div class="detail-row">
               <span class="detail-label">Nombre completo:</span>
-              <span class="detail-value">{{ `${selectedUsuario.nombre} ${selectedUsuario.ape_paterno} ${selectedUsuario.ape_materno}`.trim() }}</span>
+              <span class="detail-value">{{ `${selectedUsuario.nombre} ${selectedUsuario.ape_paterno}
+                ${selectedUsuario.ape_materno}`.trim() }}</span>
             </div>
             <div class="detail-row">
               <span class="detail-label">Carnet de Identidad:</span>
@@ -197,7 +188,7 @@
         <button class="btn-close" @click="closeModal">✕</button>
         <h2>{{ isEditing ? 'Editar Usuario' : 'Crear Nuevo Usuario' }}</h2>
         <p class="text-muted mb-4">
-          {{ isEditing ? 'Modifica los datos del usuario.' : 'Ingresa los datos para registrar un nuevo usuario en el sistema.' }}
+          {{ isEditing ? 'Modifica los datos del usuario.' : 'Ingresa los datos para registrar un nuevo usuario en elsistema.' }}
         </p>
 
         <form @submit.prevent="guardarUsuario">
@@ -222,14 +213,8 @@
 
           <div class="form-field mt-3">
             <label class="field-label">Correo electrónico *</label>
-            <input 
-              v-model="formData.correo_electronico" 
-              type="email" 
-              class="input-base" 
-              placeholder="usuario@umsa.bo" 
-              required 
-              :disabled="isEditing" 
-            />
+            <input v-model="formData.correo_electronico" type="email" class="input-base" placeholder="usuario@umsa.bo"
+              required :disabled="isEditing" />
             <small v-if="isEditing" class="text-muted">El correo no se puede modificar por seguridad.</small>
           </div>
 
@@ -245,33 +230,20 @@
           </div>
 
           <div class="form-field mt-3" v-if="!isEditing">
-            <label class="field-label">Rol inicial *</label>
-            <select v-model="formData.rol" class="input-base" required>
-              <option value="">Selecciona un rol...</option>
-              <option v-for="rol in rolesDisponibles" :key="rol.id_rol" :value="rol.nombre">
-                {{ rol.nombre }}
-              </option>
-            </select>
+            <label class="field-label">Rol seleccionado *</label>
+            <input type="text" class="input-base" :value="mostrarRol(formData.rol)" readonly
+              placeholder="Selecciona un tipo antes de crear un usuario" required />
           </div>
 
-            <div v-if="isEditing && selectedUsuario" class="form-field mt-3">
-    <label class="field-label">Rol asignado</label>
+          <div v-if="isEditing && selectedUsuario" class="form-field mt-3">
+            <label class="field-label">Rol asignado</label>
 
             <div class="roles-selection">
 
-              <div 
-                v-for="rol in rolesDisponibles" 
-                :key="rol.id_rol" 
-                class="role-checkbox"
-              >
+              <div v-for="rol in rolesDisponibles" :key="rol.id_rol" class="role-checkbox">
 
-                <input 
-                  type="radio"
-                  name="rolUsuario"
-                  :id="`rol-${rol.id_rol}`"
-                  :value="rol.nombre"
-                  v-model="formData.rol"
-                />
+                <input type="radio" name="rolUsuario" :id="`rol-${rol.id_rol}`" :value="rol.nombre"
+                  v-model="formData.rol" />
 
                 <label :for="`rol-${rol.id_rol}`">
                   {{ rol.nombre }}
@@ -293,11 +265,27 @@
         </form>
       </div>
     </div>
+
+    <div v-if="showRoleChooser" class="modal-overlay" @click.self="closeModal">
+      <div class="modal modal--small">
+        <button class="btn-close" @click="closeModal">✕</button>
+        <h2>Selecciona el tipo de usuario</h2>
+        <p class="text-muted mb-4">Elige si deseas crear un estudiante, docente o administrador. El rol se aplicará usando el endpoint correcto.</p>
+        <div class="role-choice-buttons">
+          <button type="button" class="btn btn-primary" @click="selectRoleToCreate('student')">Crear Estudiante</button>
+          <button type="button" class="btn btn-success" @click="selectRoleToCreate('teacher')">Crear Docente</button>
+          <button type="button" class="btn btn-secondary" @click="selectRoleToCreate('admin')">Crear Admin</button>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" @click="closeModal">Cancelar</button>
+        </div>
+      </div>
+    </div>
   </SuperadminLayout>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import SuperadminLayout from '../../components/SuperadminLayout.vue'
 import usuariosService from '../../services/usuarios'
 
@@ -313,10 +301,13 @@ const errorForm = ref('')
 const searchQuery = ref('')
 const filterEstado = ref('')
 const filterRol = ref('')
+const currentPage = ref(1)
+const itemsPerPage = 8
 
 // ─── CONTROL DE MODALES ───
 const showModal = ref(false)
 const showDetailsModal = ref(false)
+const showRoleChooser = ref(false)
 const isEditing = ref(false)
 
 const selectedUsuario = ref(null)
@@ -364,7 +355,7 @@ onMounted(async () => {
 async function guardarUsuario() {
   errorForm.value = ''
   isSaving.value = true
-  
+
   try {
     if (isEditing.value) {
       // Actualizar datos del usuario
@@ -394,7 +385,7 @@ async function guardarUsuario() {
           }
         }
       }
-      
+
       // Asignar roles nuevos
       for (const rol of rolesSeleccionados) {
         if (!rolesActuales.includes(rol)) {
@@ -407,7 +398,36 @@ async function guardarUsuario() {
       }
 
     } else {
-      // Crear nuevo usuario - Fallback a endpoints de auth si es necesario
+      // Crear nuevo usuario
+      if (!formData.value.rol) {
+        errorForm.value = 'Selecciona un tipo de usuario antes de crear.'
+        return
+      }
+
+      if (formData.value.rol === 'teacher') {
+        // FLUJO DE DOCENTE: En dos pasos con email
+        try {
+          await usuariosService.preRegistroDocente(
+            formData.value.nombre,
+            formData.value.ape_paterno,
+            formData.value.ape_materno,
+            formData.value.correo_electronico
+          )
+          
+          errorForm.value = ''
+          closeModal()
+          
+          // Mostrar mensaje de éxito
+          alert(`✅ Se ha enviado un correo a ${formData.value.correo_electronico}\n\nEl docente deberá completar su registro haciendo click en el enlace del email.`)
+          
+          await cargarUsuarios()
+          return
+        } catch (error) {
+          errorForm.value = error.response?.data?.detail || 'Error al enviar email. Verifica el correo.'
+          return
+        }
+      }
+
       const datosNuevoUsuario = {
         nombre: formData.value.nombre,
         ape_paterno: formData.value.ape_paterno,
@@ -415,48 +435,20 @@ async function guardarUsuario() {
         ci: formData.value.ci,
         correo_electronico: formData.value.correo_electronico,
         password: formData.value.password,
-        celular: formData.value.celular,
-        rol: formData.value.rol
-      }
-      
-      // Intentar mediante /users (si existe endpoint POST)
-      let nuevoUsuario = null
-      try {
-        const response = await fetch('http://127.0.0.1:8000/api/v1/users', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify(datosNuevoUsuario)
-        })
-        nuevoUsuario = response.ok ? await response.json() : null
-      } catch (e) {
-        console.warn('Endpoint POST /users no disponible')
+        celular: formData.value.celular
       }
 
-      // Si no existe, usar auth/register/student
+      let response
+      if (formData.value.rol === 'admin') {
+        response = await usuariosService.crearAdmin(datosNuevoUsuario)
+      } else {
+        response = await usuariosService.crearEstudiante(datosNuevoUsuario)
+      }
+
+      const nuevoUsuario = response?.data || response
       if (!nuevoUsuario) {
-        try {
-          const response = await fetch('http://127.0.0.1:8000/api/v1/auth/register/student', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datosNuevoUsuario)
-          })
-          nuevoUsuario = response.ok ? await response.json() : null
-        } catch (e) {
-          errorForm.value = 'No se pudo crear el usuario. Verifica los datos.'
-          return
-        }
-      }
-
-      // Asignar el rol seleccionado
-      if (formData.value.rol && nuevoUsuario?.id_usuario) {
-        try {
-          await usuariosService.asignarRol(nuevoUsuario.id_usuario, formData.value.rol)
-        } catch (e) {
-          console.warn('No se pudo asignar rol inicial')
-        }
+        errorForm.value = 'No se pudo crear el usuario. Verifica el endpoint del backend.'
+        return
       }
     }
 
@@ -502,16 +494,20 @@ function formatDate(dateString) {
 
 // ─── CONTROL DE INTERFAZ Y FILTROS ───
 
-const filteredUsuarios = computed(() => {
-  let result = usuarios.value
+const filteredAndSortedUsuarios = computed(() => {
+  let result = [...usuarios.value]
 
   // Filtro por Estado
   if (filterEstado.value) {
     result = result.filter(u => u.estado === filterEstado.value)
   }
+
   // Filtro por Rol
   if (filterRol.value) {
-    result = result.filter(u => u.rol === filterRol.value)
+    result = result.filter(u => {
+      const rolesUsuario = (u.instancias || []).map(inst => (inst.rol?.nombre || '').toString().toLowerCase())
+      return rolesUsuario.some(nombreRol => nombreRol.includes(filterRol.value))
+    })
   }
 
   // Filtro por Búsqueda (Texto)
@@ -524,7 +520,38 @@ const filteredUsuarios = computed(() => {
       return nombreCompleto.includes(query) || ci.includes(query) || correo.includes(query)
     })
   }
+
+  result.sort((a, b) => {
+    const aNombre = (a.nombre || '').trim().toLowerCase()
+    const bNombre = (b.nombre || '').trim().toLowerCase()
+    if (!aNombre && !bNombre) return 0
+    if (!aNombre) return 1
+    if (!bNombre) return -1
+
+    const aFirst = aNombre[0]
+    const bFirst = bNombre[0]
+    if (aFirst < bFirst) return -1
+    if (aFirst > bFirst) return 1
+    return aNombre.localeCompare(bNombre)
+  })
+
   return result
+})
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredAndSortedUsuarios.value.length / itemsPerPage)))
+const pagedUsuarios = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredAndSortedUsuarios.value.slice(start, start + itemsPerPage)
+})
+
+watch(filteredAndSortedUsuarios, () => {
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = totalPages.value
+  }
+})
+
+watch([filterEstado, filterRol, searchQuery], () => {
+  currentPage.value = 1
 })
 
 function openCreateModal() {
@@ -542,14 +569,29 @@ function openCreateModal() {
     rol: ''
   }
   errorForm.value = ''
+  showRoleChooser.value = true
+  showModal.value = false
+}
+
+function selectRoleToCreate(role) {
+  formData.value.rol = role
+  errorForm.value = ''
+  showRoleChooser.value = false
   showModal.value = true
+}
+
+function mostrarRol(rol) {
+  if (rol === 'admin') return 'Administrador'
+  if (rol === 'teacher') return 'Docente'
+  if (rol === 'student') return 'Estudiante'
+  return ''
 }
 
 function openEditModal(usuario) {
   isEditing.value = true
   selectedUsuario.value = usuario
   rolesOriginales.value = usuario.instancias?.map(inst => inst.rol?.nombre) || []
-  
+
   formData.value = {
     nombre: usuario.nombre || '',
     ape_paterno: usuario.ape_paterno || '',
@@ -571,6 +613,7 @@ function openDetailsModal(usuario) {
 
 function closeModal() {
   showModal.value = false
+  showRoleChooser.value = false
   selectedUsuario.value = null
 }
 
@@ -581,6 +624,120 @@ function closeDetailsModal() {
 </script>
 
 <style scoped>
+/* BASE */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+/* PRIMARY (crear / acción principal) */
+.btn-primary {
+  background: #00ffee;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: #00c2eb;
+  box-shadow: 0 4px 14px rgba(27, 49, 54, 0.3);
+}
+
+/* SUCCESS (guardar / aprobar) */
+.btn-success {
+  background: #eccb0ee3;
+  color: #000;
+}
+
+.btn-success:hover {
+  background: #00ef58;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+}
+
+/* WARNING (editar) */
+.btn-warning {
+  background: #f59e0b;
+  color: #000;
+}
+
+.btn-warning:hover {
+  background: #d97706;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+
+/* DANGER (eliminar) */
+.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #ff08ef;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+}
+
+/* INFO (ver detalles) */
+.btn-info {
+  background: rgba(0, 212, 255, 0.12);
+  color: #00d4ff;
+  border: 1px solid rgba(0, 212, 255, 0.4);
+}
+
+.btn-info:hover {
+  background: rgba(0, 212, 255, 0.2);
+}
+
+/* SECUNDARIO */
+.btn-secondary {
+  background: rgba(255,255,255,0.05);
+  color: #e2e8f0;
+  border: 1px solid #334155;
+}
+
+.btn-secondary:hover {
+  border-color: #00d4ff;
+  color: #00d4ff;
+}
+
+/* ICON BUTTON (acciones en tabla 🔥) */
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+/* variantes icon */
+.btn-icon.edit {
+  color: #f59e0b;
+}
+
+.btn-icon.delete {
+  color: #ef4444;
+}
+
+.btn-icon.view {
+  color: #00d4ff;
+}
+
+.btn-icon:hover {
+  transform: scale(1.1);
+  background: rgba(255,255,255,0.05);
+}
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -641,21 +798,7 @@ function closeDetailsModal() {
   border-color: #023e8a;
 }
 
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  background: #7700ff;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-  white-space: nowrap;
-}
+
 .btn-primary:hover {
   background: #0077b6;
 }
@@ -680,6 +823,7 @@ function closeDetailsModal() {
   transition: background 0.2s;
   white-space: nowrap;
 }
+
 .btn-success:hover {
   background: #0bbb17;
 }
@@ -726,6 +870,21 @@ function closeDetailsModal() {
   border-collapse: collapse;
 }
 
+.modal--small {
+  max-width: 480px;
+}
+
+.role-choice-buttons {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.modal--small .btn {
+  width: 100%;
+  justify-content: center;
+}
+
 .data-table th,
 .data-table td {
   text-align: left;
@@ -764,6 +923,35 @@ function closeDetailsModal() {
 
 .text-info {
   color: #0284c7;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.pagination-info {
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pagination-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-page {
+  color: #475569;
+  font-size: 14px;
 }
 
 .actions-cell {
@@ -809,7 +997,7 @@ function closeDetailsModal() {
 
 .badge-activo {
   background-color: #d1fae5;
-  color: #065f46;
+  color: #000000;
 }
 
 .badge-pendiente {
@@ -876,9 +1064,6 @@ function closeDetailsModal() {
   position: relative;
 }
 
-.modal--large {
-  width: 800px;
-}
 
 .btn-close {
   position: absolute;

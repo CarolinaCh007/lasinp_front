@@ -188,7 +188,7 @@ export const authService = {
    * @param {string} sexo - Sexo (M, F, Otro)
    * @returns {Promise<Object>} Datos del usuario creado
    */
-  async registroStep2(token, ci, password, confirmar_password, celular, fecha_nacimiento, direccion, sexo) {
+  async registroStep2(token, ci, password, confirmar_password, celular, fecha_nacimiento, direccion, sexo, institucion) {
     const response = await api.post('/auth/register/step2', {
       token,
       ci,
@@ -197,7 +197,8 @@ export const authService = {
       celular,
       fecha_nacimiento,
       direccion,
-      sexo
+      sexo,
+      institucion
     })
     return response.data
   },
