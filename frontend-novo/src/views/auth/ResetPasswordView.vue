@@ -122,14 +122,11 @@ export default {
       this.errors = {}
 
       // Validar nueva contraseña
+      const passwordPattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/
       if (!this.formData.nueva_password) {
         this.errors.nueva_password = 'La contraseña es requerida'
-      } else if (this.formData.nueva_password.length < 8) {
-        this.errors.nueva_password = 'La contraseña debe tener al menos 8 caracteres'
-      } else if (!/[A-Z]/.test(this.formData.nueva_password)) {
-        this.errors.nueva_password = 'La contraseña debe incluir al menos una mayúscula'
-      } else if (!/\d/.test(this.formData.nueva_password)) {
-        this.errors.nueva_password = 'La contraseña debe incluir al menos un número'
+      } else if (!passwordPattern.test(this.formData.nueva_password)) {
+        this.errors.nueva_password = 'La contraseña debe tener al menos 8 caracteres, incluir mayúscula, minúscula, número y carácter especial'
       }
 
       // Validar confirmación

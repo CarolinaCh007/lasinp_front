@@ -13,6 +13,9 @@ const cursoService = {
   listar(params = {}) {
     return api.get('/courses/cursos/', { params })
   },
+  listarPublico(params = {}) {
+    return api.get('/courses/cursos/', { params })
+  },
   obtener(id) {
     return api.get(`/courses/cursos/${id}`)
   },

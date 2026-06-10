@@ -23,8 +23,8 @@
             v-model="formData.ci"
             type="text"
             class="form-input"
-            placeholder="Ej: 1234567"
-            maxlength="20"
+            placeholder="Ej: 123456789012345"
+            maxlength="15"
             required
           />
           <span v-if="errors.ci" class="error-message">{{ errors.ci }}</span>
@@ -203,17 +203,16 @@ export default {
         this.errors.ci = 'La CI es requerida'
       } else if (!/^\d+$/.test(this.formData.ci)) {
         this.errors.ci = 'La CI solo debe contener números'
+      } else if (this.formData.ci.length > 15) {
+        this.errors.ci = 'La CI no puede tener más de 15 dígitos'
       }
 
       // Validar contraseña
+      const passwordPattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/
       if (!this.formData.password) {
         this.errors.password = 'La contraseña es requerida'
-      } else if (this.formData.password.length < 8) {
-        this.errors.password = 'La contraseña debe tener al menos 8 caracteres'
-      } else if (!/[A-Z]/.test(this.formData.password)) {
-        this.errors.password = 'La contraseña debe incluir al menos una mayúscula'
-      } else if (!/\d/.test(this.formData.password)) {
-        this.errors.password = 'La contraseña debe incluir al menos un número'
+      } else if (!passwordPattern.test(this.formData.password)) {
+        this.errors.password = 'La contraseña debe tener al menos 8 caracteres, incluir mayúscula, minúscula, número y carácter especial'
       }
 
       // Validar confirmación de contraseña

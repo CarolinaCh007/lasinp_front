@@ -14,6 +14,7 @@
             type="text"
             class="form-input"
             placeholder="Ej: Juan"
+            maxlength="50"
             required
           />
           <span v-if="errors.nombre" class="error-message">{{ errors.nombre }}</span>
@@ -28,6 +29,7 @@
             type="text"
             class="form-input"
             placeholder="Ej: González"
+            maxlength="50"
             required
           />
           <span v-if="errors.ape_paterno" class="error-message">{{ errors.ape_paterno }}</span>
@@ -42,6 +44,7 @@
             type="text"
             class="form-input"
             placeholder="Ej: López"
+            maxlength="50"
             required
           />
           <span v-if="errors.ape_materno" class="error-message">{{ errors.ape_materno }}</span>
@@ -120,18 +123,32 @@ export default {
       this.errorGeneral = ''
       this.successMessage = ''
 
+      const namePattern = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
       // Validación básica
       if (!this.formData.nombre.trim()) {
         this.errors.nombre = 'El nombre es requerido'
+      } else if (!namePattern.test(this.formData.nombre.trim())) {
+        this.errors.nombre = 'El nombre solo puede contener letras y espacios'
       }
+
       if (!this.formData.ape_paterno.trim()) {
         this.errors.ape_paterno = 'El apellido paterno es requerido'
+      } else if (!namePattern.test(this.formData.ape_paterno.trim())) {
+        this.errors.ape_paterno = 'El apellido paterno solo puede contener letras y espacios'
       }
+
       if (!this.formData.ape_materno.trim()) {
         this.errors.ape_materno = 'El apellido materno es requerido'
+      } else if (!namePattern.test(this.formData.ape_materno.trim())) {
+        this.errors.ape_materno = 'El apellido materno solo puede contener letras y espacios'
       }
+
       if (!this.formData.correo_electronico.trim()) {
         this.errors.correo_electronico = 'El correo electrónico es requerido'
+      } else if (!emailPattern.test(this.formData.correo_electronico.trim())) {
+        this.errors.correo_electronico = 'Ingresa un correo válido'
       }
 
       if (Object.keys(this.errors).length > 0) {

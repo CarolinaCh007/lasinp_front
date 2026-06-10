@@ -18,7 +18,7 @@
         <li><a href="#nosotros" @click="closeMenu">Nosotros</a></li>
         <li><a href="#testimonios" @click="closeMenu">Testimonios</a></li>
         <li><a href="#contacto"  @click="closeMenu">Contacto</a></li>
-       <li><router-link to="/registro-step1" class="btn-danger" @click="closeMenu">Registrate</router-link></li>
+       <li><router-link to="/registro-step1" class="btn-primary" @click="closeMenu">Registrate</router-link></li>
         <li><router-link to="/login" class="btn-primary" @click="closeMenu">Iniciar Sesión</router-link></li>
       </ul>
       <div class="hamburger" :class="{ active: menuOpen }" @click="toggleMenu" aria-label="Menú">
@@ -181,7 +181,7 @@
     <div class="section-inner">
       <div class="stats-grid">
         <div class="stat-item">
-          <div class="stat-number" ref="stat15000">0</div>
+          <div class="stat-number" ref="stat2000">0</div>
           <div class="stat-label">Estudiantes Egresados</div>
         </div>
         <div class="stat-item">
@@ -189,13 +189,10 @@
           <div class="stat-label">% de Inserción Laboral</div>
         </div>
         <div class="stat-item">
-          <div class="stat-number" ref="stat45">0</div>
+          <div class="stat-number" ref="stat7">0</div>
           <div class="stat-label">Cursos Activos</div>
         </div>
-        <div class="stat-item">
-          <div class="stat-number" ref="stat22">0</div>
-          <div class="stat-label">Países con Presencia</div>
-        </div>
+
       </div>
     </div>
   </div>
@@ -452,9 +449,9 @@ const navLinks = ref(null)
 
 // --- Referencias para partículas y estadísticas ---
 const particlesContainer = ref(null)
-const stat15000 = ref(null)
+const stat2000 = ref(null)
 const stat98 = ref(null)
-const stat45 = ref(null)
+const stat7 = ref(null)
 const stat22 = ref(null)
 
 let particleInterval = null
@@ -536,9 +533,9 @@ const countUp = (el, target) => {
 
 const setupStatsObserver = () => {
   const statElements = [
-    { ref: stat15000, target: 15000 },
+    { ref: stat2000, target: 2000 },
     { ref: stat98, target: 98 },
-    { ref: stat45, target: 45 },
+    { ref: stat7, target: 7 },
     { ref: stat22, target: 22 }
   ]
 
@@ -848,7 +845,7 @@ onUnmounted(() => {
 }
 /* ============ ESTILOS GLOBALES ============ */
 :root {
-  --primary: #0a0e27;
+  --primary: #001443;
   --secondary: #1a1f4e;
   --accent: #4f6ef7;
   --accent-glow: #ffffff;
@@ -1238,30 +1235,6 @@ body {
 
   transform: translateY(-3px);
 }
-
-.btn-outline {
-  background: transparent;
-  color: var(--primary);
-  border: 2px solid var(--gray-300);
-}
-
-.btn-outline:hover {
-  border-color: var(--primary);
-  background: rgba(10, 14, 39, 0.03);
-  transform: translateY(-3px);
-}
-
-.btn-gold {
-  background: linear-gradient(135deg, var(--gold), #c8963e);
-
-  box-shadow: var(--shadow-gold);
-}
-
-.btn-gold:hover {
-  box-shadow: 0 16px 45px rgba(212, 168, 83, 0.45);
-  transform: translateY(-3px);
-}
-
 /* Hero visual */
 .hero-visual {
   position: relative;

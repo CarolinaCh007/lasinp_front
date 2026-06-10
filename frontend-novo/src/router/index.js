@@ -32,6 +32,7 @@ const router = createRouter({
     { path: '/admin/dashboard',    component: () => import('../views/admin/DashboardView.vue'),      meta: { requiresAuth: true, rol: 'admin' } },
     { path: '/admin/preinscritos', component: () => import('../views/admin/PreinscritosView.vue'),   meta: { requiresAuth: true, rol: 'admin' } },
     { path: '/admin/reportes',     component: () => import('../views/admin/ReportesView.vue'),       meta: { requiresAuth: true, rol: 'admin' } },
+    { path: '/admin/cursosDisponibles', alias: ['/admin/CursosDisponibles'], component: () => import('../views/admin/CursosDispoView.vue'),       meta: { requiresAuth: true, rol: 'admin' } },
 
     // ── Superadmin ───────────────────────────────────────
     { path: '/superadmin/dashboard', name: 'DashboardSuperadmin', component: () => import('../views/superadmin/DashboardSuperadmin.vue'), meta: { requiresAuth: true, rol: 'superadmin' } },
@@ -46,6 +47,15 @@ const router = createRouter({
 router.beforeEach((to, from) => {
   if (to.meta.requiresAuth && !authService.estaAutenticado()) {
     return '/login'
+  }
+  
+  // Validar que el rol del usuario coincida con el rol requerido
+  if (to.meta.requiresAuth && to.meta.rol) {
+    const userRol = authService.getRol()
+    if (userRol !== to.meta.rol) {
+      // Redirigir a la ruta permitida según el rol del usuario
+      return authService.getRedirectPath(userRol)
+    }
   }
 })
 

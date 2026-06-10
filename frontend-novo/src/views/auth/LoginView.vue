@@ -164,11 +164,14 @@ const rutasPorRol = {
  * @returns {boolean} true si todo es válido
  */
 function validarFormulario() {
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const passwordPattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/
+
   if (!email.value.trim()) {
     errorMsg.value = 'El correo es obligatorio.'
     return false
   }
-  if (!email.value.includes('@')) {
+  if (!emailPattern.test(email.value)) {
     errorMsg.value = 'Ingresa un correo válido.'
     return false
   }
@@ -176,8 +179,8 @@ function validarFormulario() {
     errorMsg.value = 'La contraseña es obligatoria.'
     return false
   }
-  if (password.value.length < 6) {
-    errorMsg.value = 'La contraseña debe tener al menos 6 caracteres.'
+  if (!passwordPattern.test(password.value)) {
+    errorMsg.value = 'La contraseña debe tener al menos 8 caracteres, mayúscula, minúscula, número y carácter especial.'
     return false
   }
   return true
