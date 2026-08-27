@@ -119,6 +119,20 @@
               </td>
               <td class="th-center">
                 <div class="acciones-btns" v-if="p.estado === 'pendiente'">
+                  
+                    <!-- 📷 BOTÓN NUEVO -->
+                    <button class="btn-comprobante" @click="verComprobante(p)" title="Ver imagen del comprobante">
+                      📷 Recibo
+                    </button>
+
+                    <button class="btn-confirmar" @click="confirmar(p)" title="Confirmar pago">
+                      ✓ Confirmar
+                    </button>
+                    <button class="btn-rechazar" @click="rechazar(p)" title="Rechazar">
+                      ✕
+                    </button>
+                  
+
                   <button class="btn-confirmar" @click="confirmar(p)" title="Confirmar pago">
                     ✓ Confirmar
                   </button>
@@ -159,6 +173,30 @@
           📌 Esta acción cambiará el estado del estudiante a <strong>Inscrito oficialmente</strong>
           y quedará registrada en el log de auditoría.
         </div>
+        <!-- Modal para inspeccionar la foto del comprobante -->
+        <div class="modal-overlay" v-if="modalComprobanteVisible" @click="modalComprobanteVisible = false">
+          <div class="modal" @click.stop style="width: 480px;">
+            <h2>📷 Comprobante de Pago</h2>
+            <p>Estudiante: <strong>{{ seleccionado?.estudiante }}</strong></p>
+            
+            <div style="margin: 15px 0; text-align: center; background: #000; border-radius: 12px; padding: 10px;">
+              <img 
+                :src="seleccionado?.url_comprobante || 'http://127.0.0.1:8000/static/uploads/comprobantes/default.png'" 
+                alt="Comprobante de pago" 
+                style="max-width: 100%; max-height: 380px; object-fit: contain; border-radius: 8px;"
+              />
+            </div>
+
+            <div class="modal-btns">
+              <button class="btn-cancelar" @click="modalComprobanteVisible = false">Cerrar</button>
+              <button class="btn-confirmar" @click="modalComprobanteVisible = false; confirmar(seleccionado)">
+                ✓ Aprobar Pago
+              </button>
+            </div>
+          </div>
+        </div>
+
+
         <div class="modal-btns">
           <button class="btn-cancelar" @click="modalVisible = false">Cancelar</button>
           <button
@@ -181,7 +219,14 @@
 </template>
 
 <script setup>
+
+
 import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import inscripcionService from '../../services/inscripcionService'
+
+const route = useRoute()
 
 const busqueda    = ref('')
 const filtroActivo = ref('todos')
@@ -192,6 +237,12 @@ const seleccionado = ref(null)
 const toastVisible = ref(false)
 const toastError   = ref(false)
 const toastMsg     = ref('')
+const modalComprobanteVisible = ref(false)
+
+function verComprobante(p) {
+  seleccionado.value = p
+  modalComprobanteVisible.value = true
+}
 
 const filtros = [
   { value: 'todos',     label: 'Todos'     },
@@ -208,16 +259,28 @@ const cursos = ref([
   { id: 5, nombre: 'Excel & Power BI',      color: '#22c55e' },
 ])
 
-const preinscritos = ref([
-  { id: 1,  estudiante: 'Juan Pérez',      email: 'juan.p@est.umsa.bo',    curso: 'Python Data Science', cursoColor: '#00d4ff', cursoId: 1, fecha: '14/02/2025', monto: 350, dias: 5, estado: 'pendiente' },
-  { id: 2,  estudiante: 'Luis Condori',    email: 'luis.c@est.umsa.bo',    curso: 'Azure Fundamentals',  cursoColor: '#0077b6', cursoId: 3, fecha: '15/02/2025', monto: 380, dias: 4, estado: 'pendiente' },
-  { id: 3,  estudiante: 'María López',     email: 'maria.l@est.umsa.bo',   curso: 'React & Angular',     cursoColor: '#a855f7', cursoId: 2, fecha: '16/02/2025', monto: 400, dias: 3, estado: 'pendiente' },
-  { id: 4,  estudiante: 'Pedro Vargas',    email: 'pedro.v@est.umsa.bo',   curso: 'Machine Learning',    cursoColor: '#ffd700', cursoId: 4, fecha: '17/02/2025', monto: 480, dias: 2, estado: 'pendiente' },
-  { id: 5,  estudiante: 'Rosa Huanca',     email: 'rosa.h@est.umsa.bo',    curso: 'Excel & Power BI',    cursoColor: '#22c55e', cursoId: 5, fecha: '18/02/2025', monto: 250, dias: 1, estado: 'pendiente' },
-  { id: 6,  estudiante: 'Carolina Chávez', email: 'carolina@est.umsa.bo',  curso: 'Python Data Science', cursoColor: '#00d4ff', cursoId: 1, fecha: '13/02/2025', monto: 350, dias: 6, estado: 'inscrito'  },
-  { id: 7,  estudiante: 'Carlos Quispe',   email: 'carlos.q@est.umsa.bo',  curso: 'React & Angular',     cursoColor: '#a855f7', cursoId: 2, fecha: '12/02/2025', monto: 400, dias: 7, estado: 'inscrito'  },
-  { id: 8,  estudiante: 'Diego Torrez',    email: 'diego.t@est.umsa.bo',   curso: 'Azure Fundamentals',  cursoColor: '#0077b6', cursoId: 3, fecha: '10/02/2025', monto: 380, dias: 9, estado: 'rechazado' },
-])
+const preinscritos = ref([])
+const loading = ref(true)
+
+async function cargarPreinscritos() {
+  loading.value = true
+  try {
+    const res = await inscripcionService.listarPreinscritos()
+    preinscritos.value = res.data || []
+  } catch (error) {
+    console.error('[Preinscritos] Error al cargar lista:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(async () => {
+  // Si venimos de un curso específico, seleccionar ese curso en el filtro:
+  if (route.query.cursoId) {
+    cursoFiltro.value = Number(route.query.cursoId)
+  }
+  await cargarPreinscritos()
+})
 
 const preinscritosFiltrados = computed(() =>
   preinscritos.value.filter(p => {
@@ -259,16 +322,28 @@ function rechazar(p) {
   modalVisible.value = true
 }
 
-function ejecutarAccion() {
+async function ejecutarAccion() {
   const p = seleccionado.value
-  if (modalTipo.value === 'confirmar') {
-    p.estado = 'inscrito'
-    mostrarToast(`✅ ${p.estudiante} inscrito oficialmente en ${p.curso}`)
-  } else {
-    p.estado = 'rechazado'
-    mostrarToast(`Preinscripción de ${p.estudiante} rechazada.`, true)
+  if (!p) return
+
+  try {
+    const nuevoEstado = modalTipo.value === 'confirmar' ? 'activo' : 'rechazado'
+    await inscripcionService.actualizarEstado(p.id, nuevoEstado)
+
+    if (modalTipo.value === 'confirmar') {
+      mostrarToast(`✅ ${p.estudiante} inscrito oficialmente en ${p.curso}`)
+    } else {
+      mostrarToast(`Preinscripción de ${p.estudiante} rechazada.`, true)
+    }
+    
+    // Recargar la lista real de la base de datos
+    await cargarPreinscritos()
+  } catch (error) {
+    console.error('[Preinscritos] Error al cambiar estado:', error)
+    mostrarToast('❌ Ocurrió un error al actualizar la inscripción.', true)
+  } finally {
+    modalVisible.value = false
   }
-  modalVisible.value = false
 }
 
 function mostrarToast(msg, error = false) {

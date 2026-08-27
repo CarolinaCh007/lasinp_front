@@ -38,9 +38,12 @@ const router = createRouter({
     { path: '/superadmin/dashboard', name: 'DashboardSuperadmin', component: () => import('../views/superadmin/DashboardSuperadmin.vue'), meta: { requiresAuth: true, rol: 'superadmin' } },
     { path: '/superadmin/usuarios',  component: () => import('../views/superadmin/UsuariosView.vue'),  meta: { requiresAuth: true, rol: 'superadmin' } },
     { path: '/superadmin/cursos',    component: () => import('../views/superadmin/CursosAdmin.vue'),   meta: { requiresAuth: true, rol: 'superadmin' } },
+    { path: '/superadmin/cursos/:id', component: () => import('../views/superadmin/DetalleCursoView.vue'), meta: { requiresAuth: true, rol: 'superadmin' } },
+    { path: '/superadmin/preinscritos', component: () => import('../views/superadmin/PreinscritosView.vue'), meta: { requiresAuth: true, rol: 'superadmin' } },
     { path: '/superadmin/reportes',  component: () => import('../views/superadmin/ReportesView.vue'),  meta: { requiresAuth: true, rol: 'superadmin' } },
     { path: '/superadmin/auditoria', component: () => import('../views/superadmin/AuditoriaView.vue'), meta: { requiresAuth: true, rol: 'superadmin' } },
     { path: '/superadmin/perfil',    component: () => import('../views/superadmin/PerfilView.vue'),    meta: { requiresAuth: true, rol: 'superadmin' } }
+ 
   ]
 })
 

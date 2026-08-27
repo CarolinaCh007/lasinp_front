@@ -1,9 +1,10 @@
 <template>
   <SuperadminLayout>
+    <!-- Encabezado del Dashboard -->
     <div class="toolbar">
       <div class="header-titles">
-        <h1 class="page-title">Panel de Control LASIN</h1>
-        <p class="page-subtitle">Resumen general del sistema académico</p>
+        <h1 class="page-title">Panel de Control LASIN 2.0</h1>
+        <p class="page-subtitle">Resumen ejecutivo del sistema académico</p>
       </div>
       
       <button class="btn-primary" @click="cargarDatos" :disabled="cargando">
@@ -15,12 +16,15 @@
       </button>
     </div>
 
+    <!-- Mensaje de Carga -->
     <div v-if="cargando" class="empty-message" style="margin-top: 40px;">
-      <p>Calculando estadísticas del servidor...</p>
+      <p>⏳ Calculando estadísticas reales del servidor PostgreSQL...</p>
     </div>
 
+    <!-- Contenido del Dashboard -->
     <div v-else class="dashboard-content">
       
+      <!-- Las 5 Tarjetas de Indicadores (KPIs) -->
       <div class="kpi-grid">
         <div class="kpi-card">
           <div class="kpi-icon primary-light">👥</div>
@@ -45,25 +49,36 @@
             <span class="kpi-value">{{ stats.totalCursos }}</span>
           </div>
         </div>
+
+        <!-- KPI NUEVO: Estudiantes Oficialmente Activos -->
+        <div class="kpi-card">
+          <div class="kpi-icon primary-light">🎓</div>
+          <div class="kpi-info">
+            <span class="kpi-label">Estudiantes Activos</span>
+            <span class="kpi-value">{{ stats.estudiantesOficialesActivos }}</span>
+          </div>
+        </div>
         
         <div class="kpi-card">
           <div class="kpi-icon success-light">💰</div>
           <div class="kpi-info">
-            <span class="kpi-label">Ingresos (Bs)</span>
-            <span class="kpi-value">{{ stats.ingresosTotales.toFixed(2) }}</span>
+            <span class="kpi-label">Ingresos Recaudados (Bs)</span>
+            <span class="kpi-value">Bs. {{ stats.ingresosTotales.toFixed(2) }}</span>
           </div>
         </div>
       </div>
 
+      <!-- Gráficos de Estado y Tabla de Cursos Destacados -->
       <div class="content-grid">
         
+        <!-- Tarjeta de Barras de Estado de los Cursos -->
         <div class="chart-card">
           <h2 class="card-title">Estado de los Cursos</h2>
           <div class="progress-list">
             
             <div class="progress-item">
               <div class="progress-header">
-                <span>Activos</span>
+                <span>Cursos Activos</span>
                 <span>{{ stats.cursosActivos }}</span>
               </div>
               <div class="progress-track">
@@ -73,7 +88,7 @@
             
             <div class="progress-item">
               <div class="progress-header">
-                <span>Pendientes / En Pausa</span>
+                <span>Cursos Pendientes / En Pausa</span>
                 <span>{{ stats.cursosPendientes }}</span>
               </div>
               <div class="progress-track">
@@ -83,7 +98,7 @@
             
             <div class="progress-item">
               <div class="progress-header">
-                <span>Inactivos / Cerrados</span>
+                <span>Cursos Inactivos / Cerrados</span>
                 <span>{{ stats.cursosInactivos }}</span>
               </div>
               <div class="progress-track">
@@ -94,6 +109,7 @@
           </div>
         </div>
 
+        <!-- Tabla de Cursos Destacados -->
         <div class="table-container">
           <div class="table-header">
             <h2 class="card-title" style="margin: 0; border: none; padding: 20px 16px 0;">Cursos Destacados (Por Costo)</h2>
@@ -110,7 +126,7 @@
               <tr v-for="curso in cursosTop" :key="curso.id_curso">
                 <td><span class="badge-sigla">{{ curso.sigla || '-' }}</span></td>
                 <td>{{ curso.nombre || '-' }}</td>
-                <td style="font-weight: 600;">{{ parseFloat(curso.costo || 0).toFixed(2) }}</td>
+                <td style="font-weight: 600;">Bs. {{ parseFloat(curso.costo || 0).toFixed(2) }}</td>
               </tr>
               <tr v-if="cursosTop.length === 0">
                 <td colspan="3" class="empty-message">No hay cursos registrados.</td>
@@ -127,7 +143,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import SuperadminLayout from '../../components/SuperadminLayout.vue'
-import api from '../../services/api' // Tu conexión a Axios
+import api from '../../services/api'
 
 const cargando = ref(true)
 const cursosData = ref([])
@@ -139,41 +155,61 @@ const stats = ref({
   cursosActivos: 0,
   cursosPendientes: 0,
   cursosInactivos: 0,
-  ingresosTotales: 0
+  ingresosTotales: 0,
+  estudiantesOficialesActivos: 0
 })
 
 const cargarDatos = async () => {
   cargando.value = true
   try {
-    const [usuariosRes, docentesRes, cursosRes, pagosRes] = await Promise.all([
-      api.get('/users/'),
+    const [usuariosRes, docentesRes, cursosRes, pagosRes, inscripcionesRes] = await Promise.all([
+      api.get('/users/').catch(() => ({ data: [] })),
       api.get('/academic/docentes/').catch(() => ({ data: [] })),
-      api.get('/courses/cursos/'),
-      api.get('/pagos/').catch(() => ({ data: [] }))
+      api.get('/courses/cursos/').catch(() => ({ data: [] })),
+      api.get('/enrollment/pagos/').catch(() => ({ data: [] })),
+      api.get('/enrollment/inscripciones/preinscritos-todos').catch(() => ({ data: [] }))
     ])
 
     const usuarios = usuariosRes.data || []
     const docentes = docentesRes.data || []
     const cursos = cursosRes.data || []
     const pagos = pagosRes.data || []
+    const inscripciones = inscripcionesRes.data || []
 
     cursosData.value = cursos
 
+    // 1. Totales generales
     stats.value.totalUsuarios = usuarios.length
     stats.value.totalDocentes = docentes.length
     stats.value.totalCursos = cursos.length
     
+    // 2. Conteo de Cursos por Estado
     stats.value.cursosActivos = cursos.filter(c => c.estado?.toLowerCase() === 'activo').length
     stats.value.cursosPendientes = cursos.filter(c => c.estado?.toLowerCase() === 'pendiente').length
     stats.value.cursosInactivos = cursos.filter(c => c.estado?.toLowerCase() === 'inactivo').length
 
+    // 3. Sumar Ingresos de Pagos Aprobados/Completados
+    // 💰 Sumar el precio REAL de la base de datos para cada estudiante OFICIALMENTE ACTIVO
     let sumaPagos = 0
-    pagos.forEach(pago => {
-      if (pago.estado?.toLowerCase() === 'completado' || pago.estado?.toLowerCase() === 'aprobado') {
-        sumaPagos += parseFloat(pago.precio || 0)
+    inscripciones.forEach(ins => {
+      if (ins.estado === 'activo') {
+        // ins.monto trae el precio REAL del curso (230, 350, 700, etc.)
+        sumaPagos += parseFloat(ins.monto || 0)
       }
     })
+
+    // Si no vino monto en la lista, sumar de los pagos reales
+    if (sumaPagos === 0) {
+      pagos.forEach(pago => {
+        sumaPagos += parseFloat(pago.precio || 0)
+      })
+    }
+
     stats.value.ingresosTotales = sumaPagos
+
+    // 4. Contar ÚNICAMENTE los Estudiantes Oficialmente Activos (Aprobados por el Admin/Superadmin)
+    const oficialesActivos = inscripciones.filter(i => i.estado === 'activo')
+    stats.value.estudiantesOficialesActivos = oficialesActivos.length
 
   } catch (error) {
     console.error("Error cargando el dashboard:", error)
@@ -190,7 +226,7 @@ const calcularPorcentaje = (valor, total) => {
 const cursosTop = computed(() => {
   return [...cursosData.value]
     .sort((a, b) => parseFloat(b.costo || 0) - parseFloat(a.costo || 0))
-    .slice(0, 5) // Mostramos el top 5
+    .slice(0, 5)
 })
 
 onMounted(() => {
@@ -199,7 +235,6 @@ onMounted(() => {
 </script>
 
 <style>
-/* Tus variables exactas para mantener la consistencia global */
 :root {
   --color-bg: #ffffff;
   --color-surface: #f8f9fa;
@@ -219,227 +254,67 @@ onMounted(() => {
 </style>
 
 <style scoped>
-/* =============================================
-   REUTILIZACIÓN EXACTA DE TUS CLASES
-   ============================================= */
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-.header-titles {
-  display: flex;
-  flex-direction: column;
-}
-.page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--color-text);
-  margin: 0;
-}
-.page-subtitle {
-  color: var(--color-text-muted);
-  font-size: 14px;
-  margin: 4px 0 0 0;
-}
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.header-titles { display: flex; flex-direction: column; }
+.page-title { font-size: 20px; font-weight: 600; color: var(--color-text); margin: 0; }
+.page-subtitle { color: var(--color-text-muted); font-size: 14px; margin: 4px 0 0 0; }
 
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-  font-family: inherit;
-}
-.btn-primary:hover {
-  background: var(--color-primary-hover);
-}
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+.btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--color-primary); color: white; border: none; border-radius: var(--radius-md); font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-family: inherit; }
+.btn-primary:hover { background: var(--color-primary-hover); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.empty-message {
-  text-align: center;
-  color: var(--color-text-muted);
-  padding: 24px;
-}
+.empty-message { text-align: center; color: var(--color-text-muted); padding: 24px; }
 
-.table-container {
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  height: fit-content;
-}
+.table-container { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; height: fit-content; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th, .data-table td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--color-border); font-size: 14px; color: var(--color-text); }
+.data-table th { background: var(--color-surface); font-weight: 600; color: var(--color-text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover { background: var(--color-sidebar-hover); }
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.data-table th, .data-table td {
-  text-align: left;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--color-border);
-  font-size: 14px;
-  color: var(--color-text);
-}
-.data-table th {
-  background: var(--color-surface);
-  font-weight: 600;
-  color: var(--color-text-muted);
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.data-table tr:last-child td {
-  border-bottom: none;
-}
-.data-table tbody tr:hover {
-  background: var(--color-sidebar-hover);
-}
-
-/* =============================================
-   CLASES ESPECÍFICAS DEL DASHBOARD
-   ============================================= */
-.dashboard-content {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding-bottom: 32px;
-}
-
-/* Grid de KPIs */
+.dashboard-content { display: flex; flex-direction: column; gap: 24px; padding-bottom: 32px; }
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-}
-.kpi-card {
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  display: flex;
-  align-items: center;
+  grid-template-columns: repeat(5, 1fr);
   gap: 16px;
-  transition: box-shadow 0.2s;
 }
-.kpi-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+@media (max-width: 1200px) {
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr; }
 }
 
-.kpi-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-}
+.kpi-card { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 20px; display: flex; align-items: center; gap: 16px; transition: box-shadow 0.2s; }
+.kpi-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+.kpi-icon { width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 24px; }
 .primary-light { background: var(--color-active-bg); color: var(--color-primary); }
 .warning-light { background: #fef3c7; color: #d97706; }
 .info-light { background: #e0f2fe; color: #0284c7; }
 .success-light { background: #dcfce3; color: #16a34a; }
 
-.kpi-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.kpi-label {
-  color: var(--color-text-muted);
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.kpi-value {
-  color: var(--color-text);
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0;
-}
+.kpi-info { display: flex; flex-direction: column; gap: 2px; }
+.kpi-label { color: var(--color-text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { color: var(--color-text); font-size: 24px; font-weight: 700; margin: 0; }
 
-/* Gráficos y Tablas Inferiores */
-.content-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-}
+.content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 900px) { .content-grid { grid-template-columns: 1fr; } }
 
-@media (max-width: 900px) {
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
-}
+.chart-card { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 24px; height: fit-content; }
+.card-title { font-size: 16px; font-weight: 600; color: var(--color-text); margin: 0 0 20px 0; padding-bottom: 16px; border-bottom: 1px solid var(--color-border); }
 
-.chart-card {
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  height: fit-content;
-}
-.card-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-text);
-  margin: 0 0 20px 0;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--color-border);
-}
-
-/* Barras de Progreso (Adaptadas al Light Theme) */
-.progress-list {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-.progress-item {
-  width: 100%;
-}
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-text);
-}
-.progress-track {
-  width: 100%;
-  height: 8px;
-  background: var(--color-sidebar-bg);
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-}
-.progress-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 1s ease-in-out;
-}
+.progress-list { display: flex; flex-direction: column; gap: 24px; }
+.progress-item { width: 100%; }
+.progress-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: var(--color-text); }
+.progress-track { width: 100%; height: 8px; background: var(--color-sidebar-bg); border-radius: 4px; overflow: hidden; border: 1px solid var(--color-border); }
+.progress-fill { height: 100%; border-radius: 4px; transition: width 1s ease-in-out; }
 .fill-success { background: #10b981; }
 .fill-warning { background: #f59e0b; }
 .fill-danger { background: var(--color-danger); }
 
-/* Detalle especial para la tabla */
-.badge-sigla {
-  background: var(--color-active-bg);
-  color: var(--color-primary);
-  padding: 4px 8px;
-  border-radius: var(--radius-md);
-  font-size: 12px;
-  font-weight: 600;
-}
+.badge-sigla { background: var(--color-active-bg); color: var(--color-primary); padding: 4px 8px; border-radius: var(--radius-md); font-size: 12px; font-weight: 600; }
 </style>

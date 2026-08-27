@@ -153,7 +153,18 @@ export const usuariosService = {
   async revocarRol(id_usuario, nombre_rol) {
     const response = await api.delete(`/users/${id_usuario}/roles/${nombre_rol}`)
     return response.data
+  },
+
+  async resetearPassword(id_usuario, nueva_password) {
+    const response = await api.post(`/users/${id_usuario}/reset-password`, { 
+      nueva_password 
+    })
+    return response.data
   }
+
+
+
+  
 }
 
 export default usuariosService

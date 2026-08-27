@@ -119,68 +119,89 @@
       </div>
     </div>
 
-    <!-- Modal de Detalles del Usuario -->
+        <!-- Modal de Detalles del Usuario (Ficha Completa) -->
     <div v-if="showDetailsModal" class="modal-overlay" @click.self="closeDetailsModal">
       <div class="modal modal--large">
         <button class="btn-close" @click="closeDetailsModal">✕</button>
-        <h2>Detalles del Usuario</h2>
+        <h2>📄 Ficha Completa del Usuario</h2>
+        
         <div v-if="selectedUsuario" class="details-grid">
+          <!-- Columna 1: Información Personal -->
           <div class="detail-group">
-            <h3>Información Personal</h3>
+            <h3>👤 Datos Personales</h3>
             <div class="detail-row">
-              <span class="detail-label">ID:</span>
-              <span class="detail-value">{{ selectedUsuario.id_usuario }}</span>
+              <span class="detail-label">ID Sistema:</span>
+              <span class="detail-value">#{{ selectedUsuario.id_usuario }}</span>
             </div>
             <div class="detail-row">
-              <span class="detail-label">Nombre completo:</span>
-              <span class="detail-value">{{ `${selectedUsuario.nombre} ${selectedUsuario.ape_paterno}
-                ${selectedUsuario.ape_materno}`.trim() }}</span>
+              <span class="detail-label">Nombre Completo:</span>
+              <span class="detail-value"><strong>{{ `${selectedUsuario.nombre || ''} ${selectedUsuario.ape_paterno || ''} ${selectedUsuario.ape_materno || ''}`.trim() }}</strong></span>
             </div>
             <div class="detail-row">
-              <span class="detail-label">Carnet de Identidad:</span>
-              <span class="detail-value">{{ selectedUsuario.ci || '-' }}</span>
+              <span class="detail-label">Carnet de Identidad (CI):</span>
+              <span class="detail-value">{{ selectedUsuario.ci || 'No registrado' }}</span>
             </div>
             <div class="detail-row">
-              <span class="detail-label">Correo electrónico:</span>
+              <span class="detail-label">Correo Electrónico:</span>
               <span class="detail-value">{{ selectedUsuario.correo_electronico }}</span>
             </div>
             <div class="detail-row">
-              <span class="detail-label">Celular:</span>
-              <span class="detail-value">{{ selectedUsuario.celular || '-' }}</span>
+              <span class="detail-label">Celular / WhatsApp:</span>
+              <span class="detail-value">{{ selectedUsuario.celular || 'No registrado' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Fecha de Nacimiento:</span>
+              <span class="detail-value">{{ selectedUsuario.fecha_nacimiento || 'No registrada' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Género / Sexo:</span>
+              <span class="detail-value">{{ selectedUsuario.sexo === 'M' ? 'Masculino' : (selectedUsuario.sexo === 'F' ? 'Femenino' : (selectedUsuario.sexo || 'No especificado')) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Dirección:</span>
+              <span class="detail-value">{{ selectedUsuario.direccion || 'No registrada' }}</span>
             </div>
           </div>
+
+          <!-- Columna 2: Datos del Sistema y Roles -->
           <div class="detail-group">
-            <h3>Información del Sistema</h3>
+            <h3>🔐 Cuenta y Seguridad</h3>
             <div class="detail-row">
-              <span class="detail-label">Estado:</span>
+              <span class="detail-label">Estado de Cuenta:</span>
               <span :class="['badge', `badge-${selectedUsuario.estado}`]">{{ selectedUsuario.estado }}</span>
             </div>
             <div class="detail-row">
-              <span class="detail-label">Rol(es) asignado(s):</span>
+              <span class="detail-label">Rol Oficial Asignado:</span>
               <div class="roles-list">
                 <span v-for="inst in (selectedUsuario.instancias || [])" :key="inst.id_rol" class="badge-role">
                   {{ inst.rol?.nombre || 'Sin rol' }}
                 </span>
                 <span v-if="!selectedUsuario.instancias || selectedUsuario.instancias.length === 0" class="text-muted">
-                  Sin roles asignados
+                  Sin roles
                 </span>
               </div>
             </div>
             <div class="detail-row">
-              <span class="detail-label">Fecha de registro:</span>
-              <span class="detail-value">{{ formatDate(selectedUsuario.fecha_registro) }}</span>
+              <span class="detail-label">Fecha de Registro:</span>
+              <span class="detail-value">{{ formatDate(selectedUsuario.fecha_registro || selectedUsuario.created_at) }}</span>
             </div>
             <div class="detail-row">
-              <span class="detail-label">Última actualización:</span>
+              <span class="detail-label">Última Modificación:</span>
               <span class="detail-value">{{ formatDate(selectedUsuario.updated_at) }}</span>
             </div>
           </div>
         </div>
+
         <div class="modal-actions">
-          <button class="btn-secondary" @click="closeDetailsModal">Cerrar</button>
+          <button class="btn-secondary" @click="closeDetailsModal">Cerrar Ficha</button>
         </div>
       </div>
     </div>
+
+
+
+
+
 
     <!-- Modal de Crear/Editar Usuario -->
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
@@ -235,25 +256,38 @@
               placeholder="Selecciona un tipo antes de crear un usuario" required />
           </div>
 
-          <div v-if="isEditing && selectedUsuario" class="form-field mt-3">
-            <label class="field-label">Rol asignado</label>
-
-            <div class="roles-selection">
-
-              <div v-for="rol in rolesDisponibles" :key="rol.id_rol" class="role-checkbox">
-
-                <input type="radio" name="rolUsuario" :id="`rol-${rol.id_rol}`" :value="rol.nombre"
-                  v-model="formData.rol" />
-
-                <label :for="`rol-${rol.id_rol}`">
-                  {{ rol.nombre }}
-                </label>
-
-              </div>
-
-            </div>
-          </div>
           <div v-if="errorForm" class="form-error">⚠️ {{ errorForm }}</div>
+
+
+            <!-- cambiar contraseña -->
+          <!-- Sección: Cambiar Contraseña Manualmente -->
+          <div v-if="isEditing" class="form-field mt-3" style="background: #f0f9ff; padding: 16px; border-radius: 8px; border: 1px solid #bae6fd;">
+            <label class="field-label" style="color: #0369a1; font-weight: 700;">🔑 Cambiar Contraseña de Acceso</label>
+            <p style="font-size: 12px; color: #64748b; margin: 0 0 10px 0;">
+              Escribe la nueva contraseña que deseas asignarle a este usuario:
+            </p>
+            <div style="display: flex; gap: 8px;">
+              <input 
+                v-model="nuevaClaveManual" 
+                type="text" 
+                class="input-base" 
+                placeholder="Escribe la nueva contraseña (mínimo 6 caracteres)..."
+                style="background: white; border: 1px solid #93c5fd;"
+              />
+              <button 
+                type="button" 
+                class="btn btn-warning" 
+                style="white-space: nowrap;"
+                @click="handleGuardarClaveManual(selectedUsuario)"
+                :disabled="isResetting || !nuevaClaveManual || nuevaClaveManual.length < 6"
+              >
+                {{ isResetting ? 'Guardando...' : '🔑 Asignar Clave' }}
+              </button>
+            </div>
+            <small v-if="nuevaClaveManual && nuevaClaveManual.length < 6" style="color: #ef4444; font-size: 11px; margin-top: 4px; display: block;">
+              ⚠️ La contraseña debe tener al menos 6 caracteres.
+            </small>
+          </div>
 
           <div class="modal-actions">
             <button type="button" class="btn-secondary" @click="closeModal" :disabled="isSaving">Cancelar</button>
@@ -312,6 +346,10 @@ const isEditing = ref(false)
 
 const selectedUsuario = ref(null)
 const rolesOriginales = ref([])
+const nuevaClaveManual = ref('')
+const isResetting = ref(false)
+
+
 
 const formData = ref({
   nombre: '',
@@ -358,45 +396,14 @@ async function guardarUsuario() {
 
   try {
     if (isEditing.value) {
-      // Actualizar datos del usuario
+      // Actualizar datos del usuario (los roles se mantienen intactos y seguros)
       await usuariosService.actualizarUsuario(selectedUsuario.value.id_usuario, {
         nombre: formData.value.nombre,
         ape_paterno: formData.value.ape_paterno,
         ape_materno: formData.value.ape_materno,
         ci: formData.value.ci,
-        celular: formData.value.celular,
-        rol: formData.value.rol
+        celular: formData.value.celular
       })
-
-      // Sincronizar roles
-      const rolesActuales = selectedUsuario.value.instancias?.map(inst => inst.rol?.nombre) || []
-      const rolesSeleccionados = rolesDisponibles.value.filter(r => {
-        const checkbox = document.querySelector(`#rol-${r.id_rol}`)
-        return checkbox && checkbox.checked
-      }).map(r => r.nombre)
-
-      // Revocar roles deseleccionados
-      for (const rol of rolesActuales) {
-        if (!rolesSeleccionados.includes(rol)) {
-          try {
-            await usuariosService.revocarRol(selectedUsuario.value.id_usuario, rol)
-          } catch (e) {
-            console.warn('No se pudo revocar rol:', rol)
-          }
-        }
-      }
-
-      // Asignar roles nuevos
-      for (const rol of rolesSeleccionados) {
-        if (!rolesActuales.includes(rol)) {
-          try {
-            await usuariosService.asignarRol(selectedUsuario.value.id_usuario, rol)
-          } catch (e) {
-            console.warn('No se pudo asignar rol:', rol)
-          }
-        }
-      }
-
     } else {
       // Crear nuevo usuario
       if (!formData.value.rol) {
@@ -469,6 +476,30 @@ async function cambiarEstadoUsuario(id_usuario, nuevoEstado) {
     await cargarUsuarios()
   } catch (error) {
     errorMessage.value = 'Error al cambiar el estado del usuario.'
+  }
+}
+
+
+async function handleGuardarClaveManual(usuario) {
+  if (!nuevaClaveManual.value || nuevaClaveManual.value.length < 6) {
+    alert('⚠️ Por favor escribe una contraseña válida de al menos 6 caracteres.')
+    return
+  }
+
+  if (!confirm(`¿Confirmas que deseas cambiar la contraseña de "${usuario.nombre}" a "${nuevaClaveManual.value}"?`)) {
+    return
+  }
+
+  isResetting.value = true
+  try {
+    await usuariosService.resetearPassword(usuario.id_usuario, nuevaClaveManual.value)
+    alert(`✅ ¡Contraseña actualizada con éxito!\n\n👤 Usuario: ${usuario.correo_electronico}\n🔑 Nueva Clave: ${nuevaClaveManual.value}\n\nEl usuario ya puede ingresar con su nueva contraseña.`)
+    nuevaClaveManual.value = '' // Limpiar la cajita
+  } catch (error) {
+    console.error('Error al cambiar contraseña:', error)
+    alert('❌ Error al actualizar la contraseña. Revisa la conexión con el servidor.')
+  } finally {
+    isResetting.value = false
   }
 }
 
@@ -861,13 +892,31 @@ function closeDetailsModal() {
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: auto; /* 👈 Activa el scroll horizontal en pantallas pequeñas */
+  width: 100%;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .data-table {
   width: 100%;
+  min-width: 850px; /* 👈 Garantiza que las columnas no se aplasten */
   border-collapse: collapse;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap; /* 👈 Los filtros se acomodan si la pantalla es chica */
+}
+
+.filters-group {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  flex-wrap: wrap;
 }
 
 .modal--small {

@@ -131,15 +131,26 @@
         <div>
           <img src="@/assets/QR_LASIN.jpg" style="width: 100%; border-radius: 5px; margin-top: 20px;" />
         </div>
+
         <div class="upload-container">
-          <input type="file" id="foto" accept="image/*" @change="handleImage" hidden />
-          <label for="foto" class="upload-box">
-            <div class="upload-content">
+        <input type="file" id="foto" accept="image/*" @change="handleImage" hidden />
+        <label for="foto" class="upload-box" :style="comprobanteFile ? 'border-color: #10b981; background: #ecfdf5;' : ''">
+          <div class="upload-content">
+            <!-- Si NO ha seleccionado archivo, muestra las instrucciones -->
+            <template v-if="!comprobanteFile">
               <p>Haz clic para subir tu comprobante</p>
               <small>PNG, JPG o JPEG</small>
-            </div>
-          </label>
-        </div>
+            </template>
+
+            <!-- Si YA seleccionó la foto, muestra el nombre en verde con un check -->
+            <template v-else>
+              <p style="color: #059669; font-weight: 700;">✅ Archivo seleccionado:</p>
+              <small style="color: #047857; font-size: 13px; font-weight: 600;">{{ comprobanteFile.name }}</small>
+            </template>
+          </div>
+        </label>
+      </div>
+
         <div>_____________________________________</div>
         <p class="modal-aviso">Tu comprobante de pago será verificado en menos de 1 hora.</p>
         <div class="modal-btns">
@@ -157,6 +168,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import cursoService from '../../services/cursoService'
+//importaciones para el formdata de los comprobantes de pago 
+import { authService } from '../../services/auth'
+import inscripcionService from '../../services/inscripcionService'
 
 const router = useRouter()
 const busqueda = ref('')
@@ -165,13 +179,18 @@ const modalVisible = ref(false)
 const cursoSeleccionado = ref(null)
 const loading = ref(true)
 const errorMsg = ref('')
+const comprobanteFile = ref(null)
+const enviando = ref(false)
+
+// Guardar el archivo en la variable reactiva cuando el usuario lo elige
 const handleImage = (event) => {
   const file = event.target.files[0]
-
   if (file) {
-    console.log(file)
+    comprobanteFile.value = file
+    console.log('📷 Comprobante cargado:', file.name)
   }
 }
+
 
 const categorias = ['Todos', 'Desarrollo Web', 'Data Science', 'Ciberseguridad', 'Cloud', 'IA', 'Ofimática']
 
@@ -229,11 +248,62 @@ function preinscribirse(curso) {
   modalVisible.value = true
 }
 
-function confirmarPreinscripcion() {
-  // Aquí irá la llamada a Flask para guardar preinscripción
-  alert(`✅ Preinscripción enviada para: ${cursoSeleccionado.value.nombre}\n\nRecuerda ir al LASIN a confirmar tu pago.`)
-  modalVisible.value = false
+//aqui esta la funcion confirmar la preinscripcion 
+async function confirmarPreinscripcion() {
+  if (!comprobanteFile.value) {
+    alert('⚠️ Por favor selecciona la foto de tu comprobante de pago.')
+    return
+  }
+
+  enviando.value = true
+  try {
+    const usuarioActual = authService.getUsuario()
+    if (!usuarioActual || !usuarioActual.id_usuario) {
+      alert('⚠️ No se encontró la sesión de usuario. Por favor vuelve a iniciar sesión.')
+      return
+    }
+
+    // ── Usamos id_usuario directamente (Clave Primaria Compartida) ──
+    const idEstudiante = usuarioActual.id_usuario
+
+    // ── PASO 1: Crear inscripción con el id_estudiante (id_usuario) ──
+    const bodyInscripcion = {
+      inscripcion: {
+        id_horario: 1,
+        id_estudiante: idEstudiante
+      },
+      pago: {
+        id_inscripcion: 0,
+        precio: cursoSeleccionado.value?.precio || 230,
+        metodo_pago: 'Transferencia QR',
+        estado: 'pendiente'
+      }
+    }
+    const resInscripcion = await inscripcionService.crearInscripcionConPago(bodyInscripcion)
+    const idInscripcionCreada = resInscripcion.data.inscripcion.id_inscripcion
+
+    // ── PASO 2: Subir comprobante con FormData ──
+    const formData = new FormData()
+    formData.append('id_inscripcion', idInscripcionCreada)
+    formData.append('precio', cursoSeleccionado.value?.precio || 230)
+    formData.append('metodo_pago', 'Transferencia QR')
+    formData.append('comprobante', comprobanteFile.value)
+
+    await inscripcionService.crearPagoConComprobante(formData)
+
+    alert(`✅ ¡Preinscripción enviada con éxito!\n\nTu comprobante será verificado por el administrador del LASIN.`)
+    modalVisible.value = false
+    comprobanteFile.value = null
+
+  } catch (error) {
+    console.error('[Preinscripcion] Error:', error.response?.data || error)
+    const detalleError = error.response?.data?.detail || error.message || 'Error desconocido'
+    alert(`❌ Error al procesar la preinscripción:\n${detalleError}`)
+  } finally {
+    enviando.value = false
+  }
 }
+
 
 function verDetalle(curso) {
   preinscribirse(curso)

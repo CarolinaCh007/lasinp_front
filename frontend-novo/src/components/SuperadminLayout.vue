@@ -1,6 +1,20 @@
 <template>
   <div class="dashboard">
-    <aside class="sidebar">
+
+    <!-- Botón Hamburguesa (solo visible en móvil) -->
+    <button class="hamburger-btn" @click="sidebarAbierto = !sidebarAbierto">
+      ☰
+    </button>
+
+    <!-- Overlay oscuro al abrir el menú en móvil -->
+    <div 
+      class="sidebar-overlay" 
+      v-if="sidebarAbierto" 
+      @click="sidebarAbierto = false"
+    ></div>
+
+    <!-- Sidebar / Menú Lateral -->
+    <aside class="sidebar" :class="{ 'sidebar--open': sidebarAbierto }">
       <div class="sidebar-header">
         <h2>LASIN 2.0</h2>
       </div>
@@ -11,7 +25,7 @@
           href="#"
           class="nav-item"
           :class="{ active: isActive(item.route) }"
-          @click.prevent="navigate(item.route)"
+          @click.prevent="navigate(item.route); sidebarAbierto = false"
         >
           <span class="nav-icon" v-html="item.icon"></span>
           <span>{{ item.label }}</span>
@@ -26,12 +40,13 @@
           </div>
         </div>
         <button class="btn-logout" @click="logout">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           Salir
         </button>
       </div>
     </aside>
 
+    <!-- Contenido Principal -->
     <div class="main">
       <header class="topbar">
         <div class="topbar-title">
@@ -50,12 +65,17 @@
   </div>
 </template>
 
+
+
 <script setup>
-import { computed } from 'vue'
+import {ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+
 
 const router = useRouter()
 const route = useRoute()
+const sidebarAbierto = ref(false)
+
 
 const menuItems = [
   {
@@ -126,8 +146,23 @@ function logout() {
   --radius-md: 8px;
   --radius-lg: 12px;
 }
-
+/* ✅ Definir las variables directamente en .dashboard para que siempre sea claro y legible */
 .dashboard {
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-sidebar-bg: #ffffff;
+  --color-sidebar-hover: #f1f5f9;
+  --color-active-bg: rgba(37, 99, 235, 0.08);
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
   display: flex;
   min-height: 100vh;
   background: var(--color-bg);
@@ -143,6 +178,16 @@ function logout() {
   display: flex;
   flex-direction: column;
 }
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 32px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
 
 .sidebar-header {
   padding: 0 24px 24px;
@@ -276,5 +321,60 @@ function logout() {
 .content {
   flex: 1;
   padding: 24px 32px;
+}
+/* ===== RESPONSIVE SIDEBAR ===== */
+.hamburger-btn {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  width: 42px;
+  height: 42px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 999;
+}
+
+@media (max-width: 768px) {
+  .hamburger-btn { display: flex; align-items: center; justify-content: center; }
+  .sidebar-overlay { display: block; }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+  }
+
+  .sidebar--open {
+    left: 0;
+  }
+
+  .main {
+    width: 100%;
+  }
+
+  .content {
+    padding: 80px 16px 24px;
+  }
+
+  .topbar {
+    padding: 16px 16px 16px 70px;
+  }
 }
 </style>

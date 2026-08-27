@@ -110,11 +110,15 @@
               <span :class="['badge', `badge-${curso.estado}`]">{{ curso.estado }}</span>
             </td>
             <td class="actions-cell">
-              <button class="btn btn-info"    @click="abrirDetalle(curso)">Ver más</button>
-              <button class="btn btn-horario" @click="abrirHorarios(curso)">Horarios</button>
-              <button class="btn btn-success" @click="abrirModalEditar(curso)">Editar</button>
-              <button v-if="curso.estado === 'activo'" class="btn btn-danger"   @click="toggleEstado(curso)">Desactivar</button>
-              <button v-else                           class="btn btn-activate" @click="toggleEstado(curso)">Activar</button>
+              <!-- Botón 1: Ver preinscritos y comprobantes de este curso -->
+              <button class="btn btn-info" @click="verPreinscritosCurso(curso)">
+                📷 Preinscritos
+              </button>
+
+              <!-- Botón 2: Ir a la Pantalla Completa del Curso -->
+              <button class="btn btn-primary" @click="administrarCurso(curso)">
+                ➡️ Administrar Curso
+              </button>
             </td>
           </tr>
           <tr v-if="!cargando && cursosFiltrados.length === 0 && !error">
@@ -124,30 +128,40 @@
       </table>
     </div>
 
-    <!-- ═══ MODAL CREAR / EDITAR ═══ -->
+    <!-- ═══ MODAL CREAR CURSO — 2 PASOS ═══ -->
     <div v-if="modalForm" class="modal-overlay" @click.self="cerrarModal">
       <div class="modal modal--large">
         <button class="btn-close" @click="cerrarModal">✕</button>
-        <h2>{{ modoEdicion ? 'Editar Curso' : 'Nuevo Curso' }}</h2>
-        <p class="text-muted mb-4">{{ modoEdicion ? 'Modifica los datos del curso.' : 'Completa los datos para registrar un nuevo curso.' }}</p>
 
-        <form @submit.prevent="guardarCurso">
+        <!-- Indicador de pasos -->
+        <div class="wizard-steps">
+          <div :class="['wizard-step', pasoActual >= 1 ? 'active' : '']">
+            <span class="step-num">1</span>
+            <span class="step-label">Datos del Curso</span>
+          </div>
+          <div class="step-line"></div>
+          <div :class="['wizard-step', pasoActual >= 2 ? 'active' : '']">
+            <span class="step-num">2</span>
+            <span class="step-label">Horario y Aula</span>
+          </div>
+        </div>
+
+        <!-- ── PASO 1: Datos del Curso ── -->
+        <div v-if="pasoActual === 1">
+          <h2>📚 Datos del Curso</h2>
+          <p class="text-muted mb-4">Completa la información académica del curso.</p>
           <div class="form-grid">
             <div class="form-field">
               <label class="field-label">Nombre del curso *</label>
-              <input v-model="form.nombre" type="text" class="input-base" placeholder="Ej: Python Básico" required />
+              <input v-model="form.nombre" type="text" class="input-base" placeholder="Ej: Python Básico" />
             </div>
             <div class="form-field">
               <label class="field-label">Sigla *</label>
-              <input v-model="form.sigla" type="text" class="input-base" placeholder="Ej: PY-01" required />
-            </div>
-            <div class="form-field">
-              <label class="field-label">Especialidad</label>
-              <input v-model="form.especialidad" type="text" class="input-base" placeholder="Ej: Programación" />
+              <input v-model="form.sigla" type="text" class="input-base" placeholder="Ej: PY-01" />
             </div>
             <div class="form-field">
               <label class="field-label">Nivel *</label>
-              <select v-model="form.nivel" class="input-base" required>
+              <select v-model="form.nivel" class="input-base">
                 <option value="">Seleccionar...</option>
                 <option value="Básico">Básico</option>
                 <option value="Intermedio">Intermedio</option>
@@ -155,49 +169,41 @@
               </select>
             </div>
             <div class="form-field">
-              <label class="field-label">Carga horaria (h)</label>
-              <input v-model.number="form.carga_horaria" type="number" class="input-base" min="1" />
+              <label class="field-label">Especialidad</label>
+              <input v-model="form.especialidad" type="text" class="input-base" placeholder="Ej: Programación" />
+            </div>
+            <div class="form-field">
+              <label class="field-label">Costo (Bs.) *</label>
+              <input v-model.number="form.costo" type="number" class="input-base" min="0" placeholder="Ej: 230" />
+            </div>
+            <div class="form-field">
+              <label class="field-label">Cupos totales *</label>
+              <input v-model.number="form.cupos_totales" type="number" class="input-base" min="1" placeholder="Ej: 25" />
+            </div>
+            <div class="form-field">
+              <label class="field-label">Fecha de inicio</label>
+              <input v-model="form.fecha_inicio" type="date" class="input-base" />
+            </div>
+            <div class="form-field">
+              <label class="field-label">Fecha de fin</label>
+              <input v-model="form.fecha_fin" type="date" class="input-base" />
             </div>
             <div class="form-field">
               <label class="field-label">Duración</label>
               <input v-model="form.duracion" type="text" class="input-base" placeholder="Ej: 4 semanas" />
             </div>
             <div class="form-field">
-              <label class="field-label">Costo (Bs.)</label>
-              <input v-model.number="form.costo" type="number" class="input-base" min="0" />
-            </div>
-            <div class="form-field">
-              <label class="field-label">Cupos totales</label>
-              <input v-model.number="form.cupos_totales" type="number" class="input-base" min="1" />
-            </div>
-            <div class="form-field">
-              <label class="field-label">Fecha inicio</label>
-              <input v-model="form.fecha_inicio" type="date" class="input-base" />
-            </div>
-            <div class="form-field">
-              <label class="field-label">Fecha fin</label>
-              <input v-model="form.fecha_fin" type="date" class="input-base" />
-            </div>
-            <div class="form-field" v-if="modoEdicion">
-              <label class="field-label">Estado</label>
-              <select v-model="form.estado" class="input-base">
-                <option value="activo">Activo</option>
-                <option value="inactivo">Inactivo</option>
-                <option value="pendiente">Pendiente</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label class="field-label">URL Imagen</label>
-              <input v-model="form.imagen_url" type="text" class="input-base" placeholder="https://..." />
+              <label class="field-label">Carga horaria (horas)</label>
+              <input v-model.number="form.carga_horaria" type="number" class="input-base" min="1" />
             </div>
           </div>
           <div class="form-field mt-3">
             <label class="field-label">Descripción</label>
-            <textarea v-model="form.descripcion" class="input-base" rows="3" placeholder="Descripción del curso..."></textarea>
+            <textarea v-model="form.descripcion" class="input-base" rows="2" placeholder="¿De qué trata el curso?"></textarea>
           </div>
           <div class="form-field mt-3">
             <label class="field-label">Objetivo</label>
-            <textarea v-model="form.objetivo" class="input-base" rows="2" placeholder="Objetivo del curso..."></textarea>
+            <textarea v-model="form.objetivo" class="input-base" rows="2" placeholder="¿Qué aprenderá el estudiante?"></textarea>
           </div>
           <div class="form-grid mt-3">
             <div class="form-field">
@@ -209,18 +215,94 @@
               <input v-model="form.requisitos_tecnicos" type="text" class="input-base" placeholder="Ej: Laptop con 8GB RAM" />
             </div>
             <div class="form-field">
-              <label class="field-label">Link WhatsApp</label>
+              <label class="field-label">Link WhatsApp del grupo</label>
               <input v-model="form.link_whatsapp" type="text" class="input-base" placeholder="https://chat.whatsapp.com/..." />
             </div>
           </div>
           <div v-if="errorForm" class="form-error">⚠️ {{ errorForm }}</div>
           <div class="modal-actions">
-            <button type="button" class="btn-secondary" @click="cerrarModal" :disabled="guardando">Cancelar</button>
-            <button type="submit" class="btn-primary" :disabled="guardando">
-              {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar cambios' : 'Crear curso') }}
+            <button type="button" class="btn-secondary" @click="cerrarModal">Cancelar</button>
+            <button type="button" class="btn-primary" @click="siguientePaso">
+              Siguiente: Horario y Aula →
             </button>
           </div>
-        </form>
+        </div>
+
+        <!-- ── PASO 2: Horario y Aula ── -->
+        <div v-if="pasoActual === 2">
+          <h2>⏰ Horario y Aula</h2>
+          <p class="text-muted mb-4">Asigna el docente, el aula y los días/horas de clase.</p>
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="field-label">Docente a cargo</label>
+              <select v-model="formHorario.id_docente" class="input-base">
+                <option :value="null">— Sin asignar por ahora —</option>
+                <option v-for="d in docentes" :key="d.id_usuario" :value="d.id_usuario">
+                  {{ d.nombre }} {{ d.ape_paterno }} {{ d.ape_materno || '' }}
+                </option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="field-label">Aula / Laboratorio</label>
+              <select v-model="formHorario.id_aula" class="input-base">
+                <option :value="null">— Sin asignar por ahora —</option>
+                <option v-for="a in aulas" :key="a.id_aula" :value="a.id_aula">
+                  {{ a.nombre }} {{ a.capacidad ? `(Cap. ${a.capacidad})` : '' }}
+                </option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="field-label">Grupo / Paralelo</label>
+              <input v-model="formHorario.grupo" type="text" class="input-base" placeholder="Ej: Grupo A" />
+            </div>
+            <div class="form-field">
+              <label class="field-label">Modalidad</label>
+              <select v-model="formHorario.modalidad" class="input-base">
+                <option value="presencial">Presencial</option>
+                <option value="virtual">Virtual</option>
+                <option value="hibrido">Híbrido</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="field-label">Días de clase *</label>
+              <select v-model="formHorario.dia_semana" class="input-base">
+                <option value="">— Seleccionar —</option>
+                <option value="Lunes a Viernes">Lunes a Viernes</option>
+                <option value="Lunes, Miércoles y Viernes">Lun, Mié y Vie</option>
+                <option value="Martes y Jueves">Martes y Jueves</option>
+                <option value="Sábados">Sábados</option>
+                <option value="Sábados y Domingos">Sábados y Domingos</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="field-label">Cantidad de días total</label>
+              <input v-model.number="formHorario.cantidad_dias" type="number" class="input-base" min="1" placeholder="Ej: 20" />
+            </div>
+            <div class="form-field">
+              <label class="field-label">Hora de inicio *</label>
+              <input v-model="formHorario.hora_inicio" type="time" class="input-base" />
+            </div>
+            <div class="form-field">
+              <label class="field-label">Hora de fin *</label>
+              <input v-model="formHorario.hora_fin" type="time" class="input-base" />
+            </div>
+            <div class="form-field" style="grid-column: 1 / -1;">
+              <label class="field-label">Enlace de Teams (Reunión / Grabaciones del Curso)</label>
+              <input v-model="formHorario.enlace_teams" type="text" class="input-base" placeholder="https://teams.microsoft.com/l/meetup-join/..." />
+            </div>
+          </div>
+          <div v-if="aulas.length === 0" class="form-error" style="background:#fffbeb; border-color:#fbbf24; color:#92400e; margin-top:12px;">
+            ⚠️ No hay aulas registradas todavía. Puedes continuar sin aula y asignarla después desde "Administrar Curso".
+          </div>
+          <div v-if="errorForm" class="form-error">⚠️ {{ errorForm }}</div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" @click="pasoActual = 1">← Anterior</button>
+            <button type="button" class="btn-primary" @click="guardarCurso" :disabled="guardando">
+              {{ guardando ? 'Creando...' : '✅ Crear Curso Oficial' }}
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -245,14 +327,16 @@
 
   </SuperadminLayout>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import SuperadminLayout    from '../../components/SuperadminLayout.vue'
 import CursoDetalleModal   from '../../components/CursoDetalleModal.vue'
 import HorariosModal       from '../../components/HorariosModal.vue'
 import cursoService        from '../../services/cursoService'
+import horarioService      from '../../services/horarioService'
 
+const router = useRouter()
 const cursos            = ref([])
 const cargando          = ref(true)
 const error             = ref('')
@@ -269,14 +353,34 @@ const cursoSeleccionado = ref(null)
 const cursoHorarios     = ref(null)
 const toast = ref({ visible: false, mensaje: '', tipo: 'exito' })
 
+// ── Paso del wizard (1 = datos curso, 2 = horario) ──
+const pasoActual = ref(1)
+
+// ── Listas para selectores ──
+const aulas    = ref([])
+const docentes = ref([])
+
 const formVacio = () => ({
   nombre: '', sigla: '', especialidad: '', descripcion: '', objetivo: '',
-  fecha_inicio: '', fecha_fin: '', nivel: '', carga_horaria: 0, costo: 0,
-  cupos_totales: 0, imagen_url: '', duracion: '', estado: 'pendiente',
+  fecha_inicio: '', fecha_fin: '', nivel: '', carga_horaria: null, costo: null,
+  cupos_totales: null, imagen_url: '', duracion: '', estado: 'pendiente',
   link_whatsapp: '', requisitos_tecnicos: '', requisitos_previos: ''
 })
 
-const form = ref(formVacio())
+const horarioVacio = () => ({
+  id_aula: null,
+  id_docente: null,
+  grupo: 'Grupo A',
+  dia_semana: '',
+  hora_inicio: '',
+  hora_fin: '',
+  modalidad: 'presencial',
+  cantidad_dias: null,
+  enlace_teams: ''
+})
+
+const form         = ref(formVacio())
+const formHorario  = ref(horarioVacio())
 
 const cursosFiltrados = computed(() => {
   let lista = cursos.value
@@ -301,67 +405,137 @@ async function cargarCursos() {
   }
 }
 
-onMounted(cargarCursos)
-
-function abrirModalCrear() {
-  modoEdicion.value = false; form.value = formVacio(); errorForm.value = ''; modalForm.value = true
+async function cargarSelectores() {
+  try {
+    const [aulasRes, docentesRes] = await Promise.all([
+      horarioService.listarAulas(),
+      horarioService.listarDocentes()
+    ])
+    aulas.value    = aulasRes.data    || []
+    docentes.value = docentesRes.data || []
+  } catch (e) {
+    console.warn('Error cargando aulas/docentes:', e)
+  }
 }
 
-function abrirModalEditar(curso) {
-  modoEdicion.value = true; form.value = { ...curso }; errorForm.value = ''; modalForm.value = true
+onMounted(async () => {
+  await cargarCursos()
+  await cargarSelectores()
+})
+
+async function abrirModalCrear() {
+  modoEdicion.value  = false
+  form.value         = formVacio()
+  formHorario.value  = horarioVacio()
+  errorForm.value    = ''
+  pasoActual.value   = 1
+  modalForm.value    = true
+  await cargarSelectores()
 }
 
-function abrirDetalle(curso) {
-  cursoSeleccionado.value = curso; modalDetalle.value = true
-}
-
-function abrirHorarios(curso) {
-  cursoHorarios.value = curso; modalHorarios.value = true
-}
-
-function cerrarModal() {
-  modalForm.value = false; errorForm.value = ''
+function siguientePaso() {
+  if (!form.value.nombre || !form.value.sigla || !form.value.nivel) {
+    errorForm.value = 'Completa los campos obligatorios: Nombre, Sigla y Nivel.'
+    return
+  }
+  errorForm.value = ''
+  pasoActual.value = 2
 }
 
 async function guardarCurso() {
-  errorForm.value = ''; guardando.value = true
+  guardando.value = true
+  errorForm.value = ''
   try {
-    if (modoEdicion.value) {
-      await cursoService.actualizar(form.value.id_curso, form.value)
-      mostrarToast('Curso actualizado correctamente', 'exito')
-    } else {
-      await cursoService.crear(form.value)
-      mostrarToast('Curso creado correctamente', 'exito')
+    // 1. Limpiar datos del Curso (convertir strings vacíos a null y validar números > 0)
+    const payloadCurso = {
+      nombre: form.value.nombre.trim(),
+      sigla: form.value.sigla ? form.value.sigla.trim() : null,
+      nivel: form.value.nivel || null,
+      especialidad: form.value.especialidad ? form.value.especialidad.trim() : null,
+      costo: form.value.costo !== null && form.value.costo !== '' ? Number(form.value.costo) : 0,
+      cupos_totales: Number(form.value.cupos_totales) > 0 ? Number(form.value.cupos_totales) : 30,
+      carga_horaria: Number(form.value.carga_horaria) > 0 ? Number(form.value.carga_horaria) : null,
+      fecha_inicio: form.value.fecha_inicio || null,
+      fecha_fin: form.value.fecha_fin || null,
+      duracion: form.value.duracion ? form.value.duracion.trim() : null,
+      descripcion: form.value.descripcion ? form.value.descripcion.trim() : null,
+      objetivo: form.value.objetivo ? form.value.objetivo.trim() : null,
+      requisitos_previos: form.value.requisitos_previos ? form.value.requisitos_previos.trim() : null,
+      requisitos_tecnicos: form.value.requisitos_tecnicos ? form.value.requisitos_tecnicos.trim() : null,
+      link_whatsapp: form.value.link_whatsapp ? form.value.link_whatsapp.trim() : null,
+      imagen_url: form.value.imagen_url ? form.value.imagen_url.trim() : null,
+      estado: form.value.estado || 'activo'
     }
-    cerrarModal(); await cargarCursos()
+
+    const resCurso = await cursoService.crear(payloadCurso)
+    const nuevoCurso = resCurso.data
+
+    // 2. Crear el Horario vinculado al curso si se llenaron datos de horario
+    if (formHorario.value.dia_semana || formHorario.value.hora_inicio || formHorario.value.id_aula || formHorario.value.id_docente) {
+      await horarioService.crear({
+        id_curso:      nuevoCurso.id_curso,
+        id_aula:       formHorario.value.id_aula ? Number(formHorario.value.id_aula) : null,
+        id_docente:    formHorario.value.id_docente ? Number(formHorario.value.id_docente) : null,
+        grupo:         formHorario.value.grupo || 'Grupo A',
+        dia_semana:    formHorario.value.dia_semana || null,
+        hora_inicio:   formHorario.value.hora_inicio || null,
+        hora_fin:      formHorario.value.hora_fin || null,
+        modalidad:     formHorario.value.modalidad || 'presencial',
+        cantidad_dias: Number(formHorario.value.cantidad_dias) > 0 ? Number(formHorario.value.cantidad_dias) : null,
+        enlace_teams:  formHorario.value.enlace_teams ? formHorario.value.enlace_teams.trim() : null,
+        estado: 'activo'
+      })
+    }
+
+    mostrarToast('✅ Curso y horario creados exitosamente.', 'exito')
+    cerrarModal()
+    await cargarCursos()
   } catch (e) {
-    errorForm.value = e.response?.data?.detail || 'Error al guardar el curso.'
+    console.error('Error al guardar curso:', e)
+    const detail = e.response?.data?.detail
+    if (Array.isArray(detail)) {
+      errorForm.value = detail.map(err => `${err.loc?.slice(-1)[0]}: ${err.msg}`).join(' | ')
+    } else {
+      errorForm.value = detail || 'Error al guardar. Verifica los datos ingresados.'
+    }
   } finally {
     guardando.value = false
   }
 }
 
-async function toggleEstado(curso) {
-  const nuevo = curso.estado === 'activo' ? 'inactivo' : 'activo'
-  try {
-    await cursoService.actualizar(curso.id_curso, { ...curso, estado: nuevo })
-    mostrarToast(`Curso ${nuevo === 'activo' ? 'activado' : 'desactivado'}`, 'exito')
-    await cargarCursos()
-  } catch {
-    mostrarToast('Error al cambiar estado', 'error')
-  }
+function cerrarModal() {
+  modalForm.value   = false
+  pasoActual.value  = 1
+  form.value        = formVacio()
+  formHorario.value = horarioVacio()
+  errorForm.value   = ''
+}
+
+function verPreinscritosCurso(curso) {
+  const id = curso.id_curso || curso.id
+  router.push({ path: '/superadmin/preinscritos', query: { cursoId: id } })
+}
+
+function administrarCurso(curso) {
+  router.push(`/superadmin/cursos/${curso.id_curso}`)
 }
 
 function formatFecha(f) {
-  if (!f) return null
-  return new Date(f).toLocaleDateString('es-BO', { day: '2-digit', month: 'short', year: 'numeric' })
+  if (!f) return '—'
+  return new Date(f + 'T00:00:00').toLocaleDateString('es-BO', { day:'2-digit', month:'short', year:'numeric' })
 }
 
-function mostrarToast(mensaje, tipo = 'exito') {
-  toast.value = { visible: true, mensaje, tipo }
-  setTimeout(() => { toast.value.visible = false }, 3000)
+function mostrarToast(msg, tipo = 'exito') {
+  toast.value = { visible: true, mensaje: msg, tipo }
+  setTimeout(() => { toast.value.visible = false }, 3500)
 }
 </script>
+
+
+
+
+
+
 
 <style scoped>
 .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 16px; }
@@ -458,6 +632,56 @@ function mostrarToast(mensaje, tipo = 'exito') {
 .toast-exito { background: #10b981; color: white; }
 .toast-error { background: #ef4444; color: white; }
 @keyframes slideIn { from { transform: translateX(80px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* ═══ WIZARD DE PASOS ═══ */
+.wizard-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.wizard-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.wizard-step.active {
+  color: #2563eb;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.wizard-step.active .step-num {
+  background: #2563eb;
+  color: white;
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: #e2e8f0;
+  margin: 0 12px;
+}
 </style>
 
 
