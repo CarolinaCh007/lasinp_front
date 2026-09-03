@@ -31,8 +31,12 @@ const inscripcionService = {
     return api.patch(`/enrollment/inscripciones/${id_inscripcion}/estado`, null, {
       params: { nuevo_estado: nuevoEstado }
     })
+  },
+
+  // 3. Listar inscripciones de un estudiante específico
+  listarPorEstudiante(id_estudiante) {
+    return api.get('/enrollment/inscripciones/', { params: { id_estudiante, limit: 100 } })
   }
-  
 }
 
 export default inscripcionService

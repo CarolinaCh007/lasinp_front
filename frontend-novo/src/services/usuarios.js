@@ -155,16 +155,22 @@ export const usuariosService = {
     return response.data
   },
 
-  async resetearPassword(id_usuario, nueva_password) {
+   async resetearPassword(id_usuario, nueva_password) {
     const response = await api.post(`/users/${id_usuario}/reset-password`, { 
       nueva_password 
     })
     return response.data
+  },
+
+  // Cambiar contraseña del usuario autenticado (estudiante, docente, etc.)
+  async cambiarPasswordPropia(current_password, new_password) {
+    const response = await api.put('/auth/change-password', {
+      current_password,
+      new_password
+    })
+    return response.data
   }
-
-
-
-  
 }
+
 
 export default usuariosService

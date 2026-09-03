@@ -1,187 +1,211 @@
 <template>
-  <div class="dashboard">
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-logo">
-        <div class="logo-box">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-        </div>
-        <div><strong>LASIN</strong><span>Sistema v2.0</span></div>
+  <EstudianteLayout>
+    <div class="top-bar">
+      <div>
+        <h1>👤 Mi Perfil</h1>
+        <p>Gestiona tu información personal y tus credenciales de acceso</p>
       </div>
-      <nav class="sidebar-nav">
-        <router-link to="/estudiante/dashboard" class="nav-item">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-          Dashboard
-        </router-link>
-        <router-link to="/estudiante/cursos" class="nav-item">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          Catálogo de Cursos
-        </router-link>
-        <router-link to="/estudiante/perfil" class="nav-item">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Mi Perfil
-        </router-link>
-        <router-link to="/estudiante/historial" class="nav-item">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          Historial y Notas
-        </router-link>
-        <router-link to="/estudiante/mis-cursos" class="nav-item">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
-          Mis Cursos
-        </router-link>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="user-info">
-          <div class="user-avatar">{{ iniciales }}</div>
-          <div><strong>{{ nombreCompleto }}</strong><span>Estudiante</span></div>
-        </div>
-        <button class="btn-logout" @click="$router.push('/login')">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Salir
+      <div class="top-actions">
+        <button class="btn-guardar" v-if="editando" @click="guardarCambios" :disabled="guardando">
+          {{ guardando ? '⏳ Guardando...' : '✓ Guardar cambios' }}
         </button>
-      </div>
-    </aside>
-
-    <!-- Main -->
-    <main class="main">
-
-      <div class="top-bar">
-        <div>
-          <h1>Mi Perfil</h1>
-          <p>Gestiona tu información personal y académica</p>
-        </div>
-        <button class="btn-guardar" v-if="editando" @click="guardarCambios">
-          ✓ Guardar cambios
+        <button class="btn-cancelar" v-if="editando" @click="cancelarEdicion">
+          ✕ Cancelar
         </button>
-        <button class="btn-editar" v-else @click="editando = true">
+        <button class="btn-editar" v-if="!editando" @click="editando = true">
           ✏️ Editar perfil
         </button>
       </div>
+    </div>
 
-      <div class="perfil-grid">
+    <!-- Alertas globales -->
+    <div class="alerta-exito" v-if="guardado">✅ Perfil actualizado correctamente.</div>
+    <div class="alerta-error" v-if="errorMsg">⚠️ {{ errorMsg }}</div>
 
-        <!-- Card principal -->
-        <div class="card-perfil">
-          <div class="perfil-banner"></div>
-          <div class="perfil-avatar-wrap">
-            <div class="perfil-avatar">{{ iniciales }}</div>
-            <div class="perfil-badge">Estudiante</div>
+    <div class="perfil-grid">
+
+      <!-- ── Tarjeta Izquierda: Identidad y Stats ── -->
+      <div class="card-perfil">
+        <div class="perfil-banner"></div>
+        <div class="perfil-avatar-wrap">
+          <div class="perfil-avatar">{{ iniciales }}</div>
+          <div class="perfil-badge">Estudiante LASIN</div>
+        </div>
+        <div class="perfil-nombre">
+          <h2>{{ nombreCompleto }}</h2>
+          <p>{{ perfil.correo_electronico }}</p>
+        </div>
+
+        <!-- Estadísticas reales de PostgreSQL -->
+        <div class="perfil-stats">
+          <div class="pstat">
+            <span class="pstat-num">{{ statsLoading ? '…' : stats.activos }}</span>
+            <span class="pstat-label">En Curso</span>
           </div>
-          <div class="perfil-nombre">
-            <h2>{{ nombreCompleto }}</h2>
-            <p>Carrera de Informática · UMSA</p>
+          <div class="pstat-div"></div>
+          <div class="pstat">
+            <span class="pstat-num">{{ statsLoading ? '…' : stats.pendientes }}</span>
+            <span class="pstat-label">Pendientes</span>
           </div>
-
-          <div class="perfil-stats">
-            <div class="pstat">
-              <span class="pstat-num">5</span>
-              <span class="pstat-label">Completados</span>
-            </div>
-            <div class="pstat-div"></div>
-            <div class="pstat">
-              <span class="pstat-num">2</span>
-              <span class="pstat-label">En curso</span>
-            </div>
-            <div class="pstat-div"></div>
-            <div class="pstat">
-              <span class="pstat-num">87%</span>
-              <span class="pstat-label">Promedio</span>
-            </div>
-          </div>
-
-          <!-- Rutas de aprendizaje -->
-          <div class="rutas-section">
-            <p class="rutas-title">Ruta en progreso</p>
-            <div class="ruta-item" v-for="ruta in rutas" :key="ruta.nombre">
-              <div class="ruta-info">
-                <span>{{ ruta.icono }} {{ ruta.nombre }}</span>
-                <span class="ruta-pct">{{ ruta.pct }}%</span>
-              </div>
-              <div class="ruta-bar">
-                <div class="ruta-fill" :style="{ width: ruta.pct + '%', background: ruta.color }"></div>
-              </div>
-            </div>
+          <div class="pstat-div"></div>
+          <div class="pstat">
+            <span class="pstat-num">{{ statsLoading ? '…' : stats.completados }}</span>
+            <span class="pstat-label">Completados</span>
           </div>
         </div>
 
-        <!-- Formulario de datos -->
-        <div class="card-datos">
-          <h3>Información personal</h3>
+        <!-- Lista de cursos en curso -->
+        <div class="rutas-section">
+          <p class="rutas-title">Mis cursos activos</p>
+          <div v-if="statsLoading" class="loading-mini">Cargando cursos...</div>
+          <div v-else-if="cursosActivos.length === 0" class="empty-mini">Sin cursos activos actualmente</div>
+          <div v-else class="ruta-item" v-for="c in cursosActivos" :key="c.id_inscripcion">
+            <div class="ruta-info">
+              <span>📚 {{ c.sigla || c.nombreCurso }}</span>
+              <span class="badge-activo">Activo</span>
+            </div>
+            <p class="ruta-subtitle">{{ c.nombreCurso }}</p>
+          </div>
+        </div>
+      </div>
 
-          <div class="form-grid">
-            <div class="field">
-              <label>Nombre</label>
-              <input v-model="perfil.nombre" :disabled="!editando" type="text"/>
-            </div>
-            <div class="field">
-              <label>Apellido paterno</label>
-              <input v-model="perfil.ape_paterno" :disabled="!editando" type="text"/>
-            </div>
-            <div class="field">
-              <label>Apellido materno</label>
-              <input v-model="perfil.ape_materno" :disabled="!editando" type="text"/>
-            </div>
-            <div class="field">
-              <label>Correo institucional</label>
-              <input v-model="perfil.correo_electronico" disabled type="email"/>
-            </div>
-            <div class="field">
-              <label>Teléfono</label>
-              <input v-model="perfil.telefono" :disabled="!editando" type="tel"/>
-            </div>
-            <div class="field full">
-              <label>Dirección</label>
-              <input v-model="perfil.direccion" :disabled="!editando" type="text"/>
-            </div>
-            <div class="field">
-              <label>Carnet de identidad</label>
-              <input v-model="perfil.ci" :disabled="!editando" type="text"/>
-            </div>
-            <div class="field">
-              <label>Fecha de nacimiento</label>
-              <input v-model="perfil.fecha_nacimiento" :disabled="!editando" type="date"/>
-            </div>
+      <!-- ── Tarjeta Derecha: Formulario y Contraseña ── -->
+      <div class="card-datos">
+
+        <!-- Formulario Datos Personales -->
+        <h3>📋 Información personal</h3>
+        <div class="form-grid">
+          <div class="field">
+            <label>Nombre(s)</label>
+            <input v-model="perfil.nombre" :disabled="!editando" type="text" placeholder="Tu nombre"/>
+          </div>
+          <div class="field">
+            <label>Apellido paterno</label>
+            <input v-model="perfil.ape_paterno" :disabled="!editando" type="text" placeholder="Apellido paterno"/>
+          </div>
+          <div class="field">
+            <label>Apellido materno</label>
+            <input v-model="perfil.ape_materno" :disabled="!editando" type="text" placeholder="Apellido materno"/>
+          </div>
+          <div class="field">
+            <label>Correo electrónico</label>
+            <input v-model="perfil.correo_electronico" disabled type="email" title="El correo institucional no puede modificarse"/>
+          </div>
+          <div class="field">
+            <label>Teléfono / Celular</label>
+            <input v-model="perfil.telefono" :disabled="!editando" type="tel" placeholder="Ej: 78901234"/>
+          </div>
+          <div class="field">
+            <label>Carnet de identidad (CI)</label>
+            <input v-model="perfil.ci" :disabled="!editando" type="text" placeholder="Ej: 1234567"/>
+          </div>
+          <div class="field">
+            <label>Fecha de nacimiento</label>
+            <input v-model="perfil.fecha_nacimiento" :disabled="!editando" type="date"/>
+          </div>
+          <div class="field full">
+            <label>Dirección</label>
+            <input v-model="perfil.direccion" :disabled="!editando" type="text" placeholder="Ej: Av. Villazón Nro. 1995, Monoblock Central"/>
+          </div>
+        </div>
+
+        <!-- Sección de Cambio de Contraseña -->
+        <div class="password-section">
+          <div class="password-header" @click="mostrarCambioPass = !mostrarCambioPass">
+            <h3>🔐 Cambiar mi contraseña</h3>
+            <span class="toggle-icon">{{ mostrarCambioPass ? '▲' : '▼' }}</span>
           </div>
 
-          <!-- Cambiar contraseña -->
-          <div class="password-section" v-if="editando">
-            <h3>Cambiar contraseña</h3>
-            <div class="form-grid">
-              <div class="field">
-                <label>Contraseña actual</label>
-                <input type="password" placeholder="••••••••"/>
+          <div v-if="mostrarCambioPass" class="password-form">
+            <div class="field">
+              <label>Contraseña actual</label>
+              <div class="input-pass-wrap">
+                <input
+                  :type="verActual ? 'text' : 'password'"
+                  v-model="passActual"
+                  placeholder="Escribe tu contraseña actual"
+                />
+                <button class="btn-ojo" @click="verActual = !verActual" type="button">
+                  {{ verActual ? '🙈' : '👁️' }}
+                </button>
               </div>
-              <div class="field">
-                <label>Nueva contraseña</label>
-                <input type="password" placeholder="••••••••"/>
+            </div>
+
+            <div class="field">
+              <label>Nueva contraseña</label>
+              <div class="input-pass-wrap">
+                <input
+                  :type="verNueva ? 'text' : 'password'"
+                  v-model="passNueva"
+                  placeholder="Mínimo 6 caracteres"
+                />
+                <button class="btn-ojo" @click="verNueva = !verNueva" type="button">
+                  {{ verNueva ? '🙈' : '👁️' }}
+                </button>
               </div>
             </div>
-          </div>
 
-          <div class="success-msg" v-if="guardado">
-            ✅ Perfil actualizado correctamente.
-          </div>
-          <div class="error-msg" v-if="errorMsg">
-            ⚠️ {{ errorMsg }}
+            <div class="field">
+              <label>Confirmar nueva contraseña</label>
+              <div class="input-pass-wrap">
+                <input
+                  :type="verConfirm ? 'text' : 'password'"
+                  v-model="passConfirm"
+                  placeholder="Vuelve a escribir tu nueva contraseña"
+                />
+                <button class="btn-ojo" @click="verConfirm = !verConfirm" type="button">
+                  {{ verConfirm ? '🙈' : '👁️' }}
+                </button>
+              </div>
+            </div>
+
+            <div class="alerta-error" v-if="errorPass">⚠️ {{ errorPass }}</div>
+            <div class="alerta-exito" v-if="passGuardada">✅ Contraseña actualizada exitosamente.</div>
+
+            <button class="btn-guardar" @click="cambiarContrasena" :disabled="cambiandoPass">
+              {{ cambiandoPass ? '⏳ Actualizando...' : '🔐 Actualizar contraseña' }}
+            </button>
           </div>
         </div>
 
       </div>
-    </main>
-  </div>
+    </div>
+  </EstudianteLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import EstudianteLayout from '../../components/EstudianteLayout.vue'
 import { authService } from '../../services/auth'
-import usuariosService from '../../services/usuarios'
+import { usuariosService } from '../../services/usuarios'
+import inscripcionService from '../../services/inscripcionService'
+import horarioService from '../../services/horarioService'
+import cursoService from '../../services/cursoService'
 
-const editando = ref(false)
-const guardado = ref(false)
-const errorMsg = ref('')
-const loading = ref(true)
+// ── Estados ──
+const editando   = ref(false)
+const guardando  = ref(false)
+const guardado   = ref(false)
+const errorMsg   = ref('')
 
+// ── Contraseña ──
+const mostrarCambioPass = ref(false)
+const passActual   = ref('')
+const passNueva    = ref('')
+const passConfirm  = ref('')
+const verActual    = ref(false)
+const verNueva     = ref(false)
+const verConfirm   = ref(false)
+const cambiandoPass = ref(false)
+const errorPass    = ref('')
+const passGuardada = ref(false)
+
+// ── Stats ──
+const statsLoading  = ref(true)
+const cursosActivos = ref([])
+const stats = ref({ activos: 0, pendientes: 0, completados: 0 })
+
+// ── Datos Perfil ──
 const perfil = ref({
   id_usuario: null,
   nombre: '',
@@ -194,522 +218,229 @@ const perfil = ref({
   fecha_nacimiento: '',
 })
 
-const rutas = ref([
-  { nombre: 'Data Science & ML', icono: '🤖', pct: 65, color: 'linear-gradient(90deg,#0077b6,#00d4ff)' },
-  { nombre: 'Desarrollo Web Full Stack', icono: '💻', pct: 40, color: 'linear-gradient(90deg,#7c3aed,#a855f7)' },
-])
+let perfilSnapshot = {}
 
 const nombreCompleto = computed(() => {
   const parts = [perfil.value.nombre, perfil.value.ape_paterno, perfil.value.ape_materno].filter(Boolean)
-  return parts.length ? parts.join(' ') : 'Estudiante'
+  return parts.length ? parts.join(' ') : 'Estudiante LASIN'
 })
 
 const iniciales = computed(() => {
-  const parts = [perfil.value.nombre, perfil.value.ape_paterno, perfil.value.ape_materno]
+  return [perfil.value.nombre, perfil.value.ape_paterno]
     .filter(Boolean)
-    .map(part => part.trim().charAt(0).toUpperCase())
-  return parts.slice(0, 2).join('') || 'ES'
+    .map(s => s.trim().charAt(0).toUpperCase())
+    .slice(0, 2).join('') || 'ES'
 })
 
-function setPerfilFromUsuario(usuario) {
-  perfil.value.id_usuario = usuario?.id_usuario ?? usuario?.id ?? null
-  perfil.value.nombre = usuario?.nombre || ''
-  perfil.value.ape_paterno = usuario?.ape_paterno || ''
-  perfil.value.ape_materno = usuario?.ape_materno || ''
-  perfil.value.correo_electronico = usuario?.correo_electronico || usuario?.email || ''
-  perfil.value.telefono = usuario?.celular || usuario?.telefono || ''
-  perfil.value.direccion = usuario?.direccion || ''
-  perfil.value.ci = usuario?.ci || ''
-  perfil.value.fecha_nacimiento = usuario?.fecha_nacimiento || ''
+function setPerfilDesdeUsuario(u) {
+  perfil.value.id_usuario         = u?.id_usuario ?? null
+  perfil.value.nombre             = u?.nombre || ''
+  perfil.value.ape_paterno        = u?.ape_paterno || ''
+  perfil.value.ape_materno        = u?.ape_materno || ''
+  perfil.value.correo_electronico = u?.correo_electronico || u?.email || ''
+  perfil.value.telefono           = u?.celular || u?.telefono || ''
+  perfil.value.direccion          = u?.direccion || ''
+  perfil.value.ci                 = u?.ci || ''
+  perfil.value.fecha_nacimiento   = u?.fecha_nacimiento || ''
 }
 
 async function cargarPerfil() {
-  const usuarioLocal = authService.getUsuario()
-  if (usuarioLocal) {
-    setPerfilFromUsuario(usuarioLocal)
-  }
-
+  const local = authService.getUsuario()
+  if (local) setPerfilDesdeUsuario(local)
   try {
-    const usuario = await authService.refreshUsuario()
-    setPerfilFromUsuario(usuario)
-  } catch (error) {
-    console.warn('[PerfilEstudiante] No se pudo refrescar el usuario', error)
+    const fresco = await authService.refreshUsuario()
+    setPerfilDesdeUsuario(fresco)
+  } catch (e) {
+    console.warn('[Perfil] No se pudo refrescar el usuario:', e)
+  }
+}
+
+async function cargarStats() {
+  statsLoading.value = true
+  try {
+    const idEstudiante = perfil.value.id_usuario || authService.getUsuario()?.id_usuario
+    if (!idEstudiante) return
+
+    const [resInsc, resCursos, resHorarios] = await Promise.all([
+      inscripcionService.listarPorEstudiante(idEstudiante).catch(() => ({ data: [] })),
+      cursoService.listar({ limit: 100 }).catch(() => ({ data: [] })),
+      horarioService.listar({ limit: 100 }).catch(() => ({ data: [] }))
+    ])
+
+    const inscripciones  = resInsc.data || []
+    const todosLosCursos = resCursos.data || []
+    const todosHorarios  = resHorarios.data || []
+
+    stats.value.activos     = inscripciones.filter(i => i.estado === 'activo').length
+    stats.value.pendientes  = inscripciones.filter(i => i.estado === 'pendiente').length
+    stats.value.completados = inscripciones.filter(i => i.estado === 'completado').length
+
+    cursosActivos.value = inscripciones
+      .filter(i => i.estado === 'activo')
+      .map(insc => {
+        const horario = todosHorarios.find(h => h.id_horario === insc.id_horario) || {}
+        const curso   = todosLosCursos.find(c => c.id_curso === horario.id_curso) || {}
+        return {
+          id_inscripcion: insc.id_inscripcion,
+          nombreCurso: curso.nombre || 'Curso LASIN',
+          sigla: curso.sigla || ''
+        }
+      })
+  } catch (e) {
+    console.error('[Perfil] Error al cargar stats:', e)
   } finally {
-    loading.value = false
+    statsLoading.value = false
   }
 }
 
 async function guardarCambios() {
   errorMsg.value = ''
   guardado.value = false
+  guardando.value = true
 
   if (!perfil.value.id_usuario) {
     errorMsg.value = 'No se pudo identificar al usuario.'
+    guardando.value = false
     return
   }
 
-  const datos = {
-    nombre: perfil.value.nombre,
-    ape_paterno: perfil.value.ape_paterno,
-    ape_materno: perfil.value.ape_materno,
-    telefono: perfil.value.telefono,
-    direccion: perfil.value.direccion,
-    semestre: perfil.value.semestre,
-    fecha_nacimiento: perfil.value.fecha_nacimiento,
-  }
-
   try {
-    await usuariosService.actualizarUsuario(perfil.value.id_usuario, datos)
+    await usuariosService.actualizarUsuario(perfil.value.id_usuario, {
+      nombre:           perfil.value.nombre,
+      ape_paterno:      perfil.value.ape_paterno,
+      ape_materno:      perfil.value.ape_materno,
+      telefono:         perfil.value.telefono,
+      direccion:        perfil.value.direccion,
+      fecha_nacimiento: perfil.value.fecha_nacimiento || null,
+    })
     editando.value = false
     guardado.value = true
     await authService.refreshUsuario()
-    setPerfilFromUsuario(authService.getUsuario())
-    setTimeout(() => (guardado.value = false), 3000)
-  } catch (error) {
-    console.error('[PerfilEstudiante] Error al guardar perfil:', error)
-    errorMsg.value = error.response?.data?.detail || 'No se pudo guardar el perfil. Revisa tu conexión.'
+    setPerfilDesdeUsuario(authService.getUsuario())
+    setTimeout(() => (guardado.value = false), 3500)
+  } catch (e) {
+    errorMsg.value = e.response?.data?.detail || 'No se pudo guardar el perfil.'
+  } finally {
+    guardando.value = false
   }
 }
 
-onMounted(cargarPerfil)
+function cancelarEdicion() {
+  setPerfilDesdeUsuario(perfilSnapshot)
+  editando.value = false
+  errorMsg.value = ''
+}
+
+async function cambiarContrasena() {
+  errorPass.value = ''
+  passGuardada.value = false
+
+  if (!passActual.value || !passNueva.value || !passConfirm.value) {
+    errorPass.value = 'Por favor completa todos los campos de contraseña.'
+    return
+  }
+  if (passNueva.value.length < 6) {
+    errorPass.value = 'La nueva contraseña debe tener al menos 6 caracteres.'
+    return
+  }
+  if (passNueva.value !== passConfirm.value) {
+    errorPass.value = 'Las contraseñas nuevas no coinciden.'
+    return
+  }
+
+  cambiandoPass.value = true
+  try {
+    await usuariosService.cambiarPasswordPropia(passActual.value, passNueva.value)
+    passGuardada.value = true
+    passActual.value = ''
+    passNueva.value = ''
+    passConfirm.value = ''
+    setTimeout(() => {
+      passGuardada.value = false
+      mostrarCambioPass.value = false
+    }, 3500)
+  } catch (e) {
+    errorPass.value = e.response?.data?.detail || 'Contraseña actual incorrecta o error en el servidor.'
+  } finally {
+    cambiandoPass.value = false
+  }
+}
+
+onMounted(async () => {
+  await cargarPerfil()
+  perfilSnapshot = { ...perfil.value }
+  await cargarStats()
+})
 </script>
+
 <style scoped>
-/* Estilos base - Sin importaciones externas */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+.top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 14px; }
+.top-bar h1 { font-size: 24px; font-weight: 700; color: #0f172a; }
+.top-bar p { font-size: 14px; color: #64748b; margin-top: 3px; }
 
-.dashboard { 
-    font-family: system-ui, -apple-system, 'Segoe UI', 'Sora', sans-serif; 
-    display: flex; 
-    min-height: 100vh; 
-    background: #f8fafc;
-    color: #1e293b;
+.top-actions { display: flex; gap: 10px; }
+.btn-editar  { padding: 10px 20px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #0077b6; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+.btn-editar:hover { border-color: #00b4d8; color: #00b4d8; }
+.btn-guardar { padding: 10px 20px; background: #0077b6; border: none; border-radius: 8px; color: white; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .2s; }
+.btn-guardar:hover:not(:disabled) { background: #005f92; }
+.btn-guardar:disabled { opacity: .6; cursor: not-allowed; }
+.btn-cancelar { padding: 10px 18px; background: white; border: 1px solid #fca5a5; border-radius: 8px; color: #dc2626; font-size: 13px; font-weight: 600; cursor: pointer; }
+.btn-cancelar:hover { background: #fef2f2; }
+
+.alerta-exito { padding: 12px 16px; background: #d1fae5; border: 1px solid #a7f3d0; color: #065f46; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+.alerta-error { padding: 12px 16px; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+
+/* ── Grid Principal ── */
+.perfil-grid { display: grid; grid-template-columns: 320px 1fr; gap: 24px; }
+
+/* ── Card Izquierda ── */
+.card-perfil { background: white; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+.perfil-banner { height: 84px; background: linear-gradient(135deg, #0077b6, #00b4d8); }
+.perfil-avatar-wrap { text-align: center; margin-top: -38px; position: relative; }
+.perfil-avatar { width: 76px; height: 76px; border-radius: 50%; background: linear-gradient(135deg, #0077b6, #00b4d8); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: white; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.perfil-badge { display: inline-block; background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 100px; padding: 3px 12px; font-size: 10px; font-weight: 700; color: #0077b6; margin-top: 6px; text-transform: uppercase; letter-spacing: .5px; }
+.perfil-nombre { text-align: center; padding: 10px 20px 16px; }
+.perfil-nombre h2 { font-size: 18px; font-weight: 700; color: #0f172a; }
+.perfil-nombre p { font-size: 12px; color: #64748b; margin-top: 2px; word-break: break-all; }
+
+.perfil-stats { display: flex; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px; }
+.pstat { flex: 1; text-align: center; padding: 14px 6px; }
+.pstat-num { display: block; font-size: 22px; font-weight: 800; color: #0077b6; }
+.pstat-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: .5px; }
+.pstat-div { width: 1px; background: #e2e8f0; align-self: center; height: 28px; }
+
+.rutas-section { padding: 0 20px 20px; }
+.rutas-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #475569; margin-bottom: 12px; }
+.loading-mini, .empty-mini { font-size: 12px; color: #94a3b8; text-align: center; padding: 10px; }
+.ruta-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+.ruta-info { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: #1e293b; }
+.ruta-subtitle { font-size: 11px; color: #64748b; margin-top: 3px; }
+.badge-activo { background: #dcfce7; color: #166534; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 700; }
+
+/* ── Card Derecha ── */
+.card-datos { background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 28px; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+.card-datos h3 { font-size: 15px; font-weight: 700; margin-bottom: 20px; color: #0f172a; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+.field.full { grid-column: 1 / -1; }
+.field label { display: block; font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 7px; }
+.field input { width: 100%; padding: 11px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1e293b; font-size: 14px; outline: none; transition: all .2s; }
+.field input:disabled { background: #f8fafc; color: #94a3b8; cursor: not-allowed; }
+.field input:not(:disabled):focus { border-color: #00b4d8; box-shadow: 0 0 0 3px rgba(0,180,216,.1); }
+
+/* ── Cambiar Contraseña ── */
+.password-section { border-top: 1px solid #e2e8f0; padding-top: 22px; }
+.password-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+.password-header:hover h3 { color: #0077b6; }
+.toggle-icon { font-size: 12px; color: #94a3b8; }
+.password-form { margin-top: 20px; display: flex; flex-direction: column; gap: 16px; }
+.input-pass-wrap { position: relative; display: flex; }
+.input-pass-wrap input { flex: 1; padding-right: 44px; }
+.btn-ojo { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; padding: 0; line-height: 1; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .perfil-grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
 }
-
-/* Sidebar - Fondo blanco, texto negro, acento turquesa */
-.sidebar { 
-    width: 260px; 
-    flex-shrink: 0; 
-    background: white;
-    border-right: 1px solid #e2e8f0;
-    display: flex; 
-    flex-direction: column; 
-    padding: 28px 20px; 
-}
-
-.sidebar-logo { 
-    display: flex; 
-    align-items: center; 
-    gap: 12px; 
-    margin-bottom: 40px; 
-    padding: 0 8px; 
-}
-
-.logo-box { 
-    width: 40px; 
-    height: 40px; 
-    background: linear-gradient(135deg, #00b4d8, #0077b6); /* turquesa */
-    border-radius: 10px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    color: white; 
-    flex-shrink: 0; 
-}
-
-.sidebar-logo strong { 
-    display: block; 
-    font-size: 15px; 
-    font-weight: 700; 
-    color: #1e293b;
-}
-
-.sidebar-logo span { 
-    font-size: 11px; 
-    color: #64748b;
-}
-
-.sidebar-nav { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 4px; 
-    flex: 1; 
-}
-
-.nav-item { 
-    display: flex; 
-    align-items: center; 
-    gap: 12px; 
-    padding: 11px 14px; 
-    border-radius: 10px; 
-    color: #000000;
-    text-decoration: none; 
-    font-size: 14px; 
-    font-weight: 500; 
-    transition: all 0.2s; 
-}
-
-.nav-item:hover { 
-    background: rgba(0, 180, 216, 0.08);
-    color: #00b4d8;
-}
-
-.nav-item.router-link-active { 
-    background: rgba(0, 180, 216, 0.12);
-    color: #00b4d8;
-}
-
-.sidebar-footer { 
-    border-top: 1px solid #e2e8f0;
-    padding-top: 20px; 
-}
-
-.user-info { 
-    display: flex; 
-    align-items: center; 
-    gap: 10px; 
-    margin-bottom: 12px; 
-}
-
-.user-avatar { 
-    width: 36px; 
-    height: 36px; 
-    border-radius: 50%; 
-    background: linear-gradient(135deg, #00b4d8, #0077b6);
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 12px; 
-    font-weight: 700; 
-    color: white;
-    flex-shrink: 0; 
-}
-
-.user-info strong { 
-    display: block; 
-    font-size: 13px; 
-    color: #000000;
-}
-
-.user-info span { 
-    font-size: 11px; 
-    color: #000000; 
-}
-
-.btn-logout { 
-    width: 100%; 
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
-    padding: 9px 14px; 
-    background: transparent; 
-    border: 1px solid #e2e8f0; 
-    border-radius: 8px; 
-    color: #1e293b;
-    font-family: inherit; 
-    font-size: 13px; 
-    cursor: pointer; 
-    transition: all 0.2s; 
-}
-
-.btn-logout:hover { 
-    border-color: #ef4444;
-    color: #ef4444;
-    background: #fef2f2;
-}
-
-/* Main */
-.main { 
-    flex: 1; 
-    padding: 36px 40px; 
-    overflow-y: auto; 
-}
-
-.top-bar { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: flex-start; 
-    margin-bottom: 32px; 
-}
-
-.top-bar h1 { 
-    font-size: 26px; 
-    font-weight: 700; 
-    margin-bottom: 4px; 
-    color: #1e293b;
-}
-
-.top-bar p { 
-    font-size: 14px; 
-    color: #475569;
-}
-
-/* Botones estilo LASIN BLANCO */
-.btn-editar { 
-    padding: 10px 22px; 
-    background: white; 
-    border: 1px solid #e2e8f0; 
-    border-radius: 8px; 
-    color: #0077b6;
-    font-family: inherit; 
-    font-size: 13px; 
-    font-weight: 600; 
-    cursor: pointer; 
-    transition: all 0.2s; 
-}
-
-.btn-editar:hover { 
-    background: #f8fafc; 
-    border-color: #00b4d8;
-    color: #00b4d8;
-}
-
-.btn-guardar { 
-    padding: 10px 22px; 
-    background: linear-gradient(135deg, #00b4d8, #0077b6);
-    border: none; 
-    border-radius: 8px; 
-    color: white; 
-    font-family: inherit; 
-    font-size: 13px; 
-    font-weight: 600; 
-    cursor: pointer; 
-    transition: opacity 0.2s; 
-}
-
-.btn-guardar:hover { 
-    opacity: 0.9; 
-}
-
-/* Grid */
-.perfil-grid { 
-    display: grid; 
-    grid-template-columns: 320px 1fr; 
-    gap: 24px; 
-}
-
-/* Card perfil */
-.card-perfil { 
-    background: white; 
-    border: 1px solid #e2e8f0; 
-    border-radius: 12px; 
-    overflow: hidden; 
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-.perfil-banner { 
-    height: 90px; 
-    background: linear-gradient(135deg, #0077b6, #00b4d8);
-    opacity: 0.9; 
-}
-
-.perfil-avatar { 
-    width: 72px; 
-    height: 72px; 
-    border-radius: 50%; 
-    background: linear-gradient(135deg, #0077b6, #00b4d8);
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 22px; 
-    font-weight: 700; 
-    color: white;
-    border: 3px solid white; 
-}
-
-.perfil-badge { 
-    position: absolute; 
-    bottom: 0; 
-    right: calc(50% - 60px); 
-    background: #e0f2fe;
-    border: 1px solid #cbd5e1; 
-    border-radius: 100px; 
-    padding: 2px 10px; 
-    font-size: 10px; 
-    color: #0077b6;
-    font-weight: 600; 
-}
-
-.perfil-nombre { 
-    text-align: center; 
-    padding: 0 24px 20px; 
-}
-
-.perfil-nombre h2 { 
-    font-size: 18px; 
-    font-weight: 700; 
-    margin-bottom: 4px; 
-    color: #1e293b;
-}
-
-.perfil-nombre p { 
-    font-size: 12px; 
-    color: #475569;
-}
-
-.perfil-stats { 
-    display: flex; 
-    justify-content: center; 
-    gap: 0; 
-    border-top: 1px solid #e2e8f0; 
-    border-bottom: 1px solid #e2e8f0; 
-    margin: 0 0 24px; 
-}
-
-.pstat { 
-    flex: 1; 
-    text-align: center; 
-    padding: 16px 8px; 
-}
-
-.pstat-num { 
-    display: block; 
-    font-size: 22px; 
-    font-weight: 700; 
-    color: #0077b6;
-}
-
-.pstat-label { 
-    font-size: 10px; 
-    color: #64748b; 
-    text-transform: uppercase; 
-    letter-spacing: 0.5px; 
-}
-
-.pstat-div { 
-    width: 1px; 
-    background: #e2e8f0; 
-    align-self: center; 
-    height: 32px; 
-}
-
-.rutas-section { 
-    padding: 0 24px 24px; 
-}
-
-.rutas-title { 
-    font-size: 11px; 
-    font-weight: 600; 
-    text-transform: uppercase; 
-    letter-spacing: 1px; 
-    color: #475569;
-    margin-bottom: 14px; 
-}
-
-.ruta-item { 
-    margin-bottom: 14px; 
-}
-
-.ruta-info { 
-    display: flex; 
-    justify-content: space-between; 
-    font-size: 12px; 
-    margin-bottom: 6px; 
-    color: #1e293b;
-}
-
-.ruta-pct { 
-    color: #00b4d8;
-    font-weight: 600; 
-}
-
-.ruta-bar { 
-    height: 5px; 
-    background: #f1f5f9; 
-    border-radius: 4px; 
-}
-
-.ruta-fill { 
-    height: 100%; 
-    border-radius: 4px; 
-    background: #00b4d8;
-    transition: width 1s ease; 
-}
-
-/* Card datos */
-.card-datos { 
-    background: white; 
-    border: 1px solid #e2e8f0; 
-    border-radius: 12px; 
-    padding: 28px; 
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-.card-datos h3 { 
-    font-size: 15px; 
-    font-weight: 700; 
-    margin-bottom: 22px; 
-    color: #1e293b;
-}
-
-.form-grid { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 16px; 
-    margin-bottom: 28px; 
-}
-
-.field.full { 
-    grid-column: 1 / -1; 
-}
-
-.field label { 
-    display: block; 
-    font-size: 11px; 
-    font-weight: 700; 
-    color: #475569;
-    text-transform: uppercase; 
-    letter-spacing: 0.8px; 
-    margin-bottom: 8px; 
-}
-
-.field input { 
-    width: 100%; 
-    padding: 12px 16px; 
-    background: white; 
-    border: 1px solid #e2e8f0; 
-    border-radius: 8px; 
-    color: #1e293b;
-    font-family: inherit; 
-    font-size: 14px; 
-    font-weight: normal;
-    outline: none; 
-    transition: all 0.2s; 
-}
-
-.field input:disabled { 
-    opacity: 0.5; 
-    cursor: not-allowed; 
-    background: #f8fafc;
-}
-
-.field input:focus { 
-    border-color: #00b4d8;
-    box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.1);
-}
-
-.password-section { 
-    border-top: 1px solid #e2e8f0; 
-    padding-top: 24px; 
-}
-
-.password-section h3 { 
-    font-size: 15px; 
-    font-weight: 700; 
-    margin-bottom: 18px; 
-    color: #1e293b;
-}
-
-.success-msg { 
-    margin-top: 20px; 
-    background: #d1fae5; 
-    border: 1px solid #a7f3d0; 
-    color: #065f46; 
-    border-radius: 8px; 
-    padding: 12px 16px; 
-    font-size: 13px; 
-}
-
-/* Utilidades */
-.text-muted { color: #64748b; }
-.text-danger { color: #ef4444; }
 </style>
